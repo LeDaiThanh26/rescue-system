@@ -66,10 +66,10 @@ export const ReportMarker: React.FC<ReportMarkerProps> = ({
       }}
     >
       {isOpen && (
-        <Popup onClose={handleClose}>
+        <Popup>
           <MarkerPopup
             report={report}
-            onClose={handleClose}
+            onClose={() => setIsOpen(false)}
             onNavigate={onNavigate}
           />
         </Popup>
