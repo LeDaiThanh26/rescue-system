@@ -1,107 +1,136 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Report, ReportFilter } from '@/types/report';
 import { reportService } from '@/services/reportService';
+import { applyClientFilters } from '@/utils/mapFilters';
 import { FilterPanel } from '@/components/map/FilterPanel';
+import { CaseTracker } from '@/components/map/CaseTracker';
 import { useRouter } from 'next/navigation';
 
-// Dynamic import for MapView to avoid SSR issues with Leaflet
-const MapView = dynamic(() => import('@/components/map/MapView').then((mod) => mod.MapView), {
-  ssr: false,
-  loading: () => <div className="w-full h-full flex items-center justify-center bg-gray-200">Đang tải bản đồ...</div>,
-});
+const MapView = dynamic(
+  () => import('@/components/map/MapView').then((mod) => mod.MapView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500 text-sm">
+        Đang tải bản đồ...
+      </div>
+    ),
+  }
+);
 
 export default function MapPage() {
   const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [filters, setFilters] = useState<ReportFilter>({});
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [, setSelectedReport] = useState<Report | null>(null);
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch reports
-  const fetchReports = async () => {
+  const fetchReports = async (activeFilters: ReportFilter) => {
     setLoading(true);
+    setError(null);
     try {
-      const data = await reportService.getAllReports();
+      const hasFilters = Object.values(activeFilters).some(Boolean);
+      const data = hasFilters
+        ? await reportService.filterReports(activeFilters)
+        : await reportService.getAllReports();
       setReports(data);
-    } catch (error) {
-      console.error('Error fetching reports:', error);
+    } catch {
+      setError('Không tải được dữ liệu. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial fetch and setup auto-refresh
+  // UC01 + auto-refresh 30s (doc §5.1)
   useEffect(() => {
-    fetchReports();
+    fetchReports(filters);
 
-    // Auto-refresh every 30 seconds
     refreshIntervalRef.current = setInterval(() => {
-      fetchReports();
+      fetchReports(filters);
     }, 30000);
 
     return () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
-      }
+      if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
     };
-  }, []);
+  }, [filters]);
 
-  const handleFilterChange = (newFilters: ReportFilter) => {
-    setFilters(newFilters);
-  };
+  const displayed = useMemo(() => applyClientFilters(reports, filters), [reports, filters]);
 
-  const handleMarkerClick = (report: Report) => {
-    setSelectedReport(report);
-  };
-
-  const handleNavigate = (reportId: number) => {
-    router.push(`/report/${reportId}`);
-  };
+  const highCount = displayed.filter((r) => r.priority === 'HIGH').length;
+  const mediumCount = displayed.filter((r) => r.priority === 'MEDIUM').length;
+  const resolvedCount = displayed.filter((r) => r.priority === 'RESOLVED').length;
+  const pendingCount = displayed.filter((r) => r.status === 'PENDING').length;
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Filter Panel */}
-      <div className="w-64 bg-gray-50 p-4 overflow-y-auto border-r border-gray-300 shadow-md">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Bản Đồ Cứu Trợ</h1>
-        <FilterPanel filters={filters} onFiltersChange={handleFilterChange} />
-
-        {/* Report Summary */}
-        <div className="mt-6 bg-white p-4 rounded-lg shadow">
-          <h3 className="font-bold text-gray-800 mb-2">Tóm tắt</h3>
-          <div className="space-y-2 text-sm text-gray-700">
-            <p>Tổng yêu cầu: <span className="font-bold">{reports.length}</span></p>
-            <p>Khẩn cấp: <span className="font-bold text-red-600">{reports.filter((r) => r.priority === 'HIGH').length}</span></p>
-            <p>Thường: <span className="font-bold text-orange-600">{reports.filter((r) => r.priority === 'MEDIUM').length}</span></p>
-            <p>Thấp: <span className="font-bold text-green-600">{reports.filter((r) => r.priority === 'LOW').length}</span></p>
-            <p>Chưa xử lý: <span className="font-bold text-yellow-600">{reports.filter((r) => r.status === 'PENDING').length}</span></p>
-          </div>
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
+      <div className="w-72 flex-shrink-0 bg-gray-50 flex flex-col border-r border-gray-300 shadow-md overflow-y-auto">
+        <div className="bg-blue-700 text-white p-4">
+          <h1 className="text-xl font-bold leading-tight">🗺️ Bản Đồ Cứu Trợ</h1>
+          <p className="text-blue-200 text-xs mt-1">Toàn quốc Việt Nam</p>
         </div>
 
-        {/* Refresh Button */}
-        <button
-          onClick={fetchReports}
-          disabled={loading}
-          className="w-full mt-4 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded transition"
-        >
-          {loading ? 'Đang tải...' : 'Làm mới'}
-        </button>
+        <div className="p-4 space-y-4 flex-1">
+          <FilterPanel filters={filters} onFiltersChange={setFilters} />
+          <CaseTracker />
+
+          {error && (
+            <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded p-2">
+              {error}
+            </p>
+          )}
+
+          <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+            <h3 className="font-bold text-gray-800 mb-3">📊 Tổng quan</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tổng yêu cầu</span>
+                <span className="font-bold text-gray-800">{displayed.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-red-600">🔴 Khẩn cấp</span>
+                <span className="font-bold text-red-600">{highCount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-yellow-600">🟡 Cần tiếp tế</span>
+                <span className="font-bold text-yellow-600">{mediumCount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-green-600">🟢 Đã xử lý</span>
+                <span className="font-bold text-green-600">{resolvedCount}</span>
+              </div>
+              <div className="border-t pt-2 flex justify-between">
+                <span className="text-gray-600">⏳ Chờ xử lý</span>
+                <span className="font-bold text-orange-600">{pendingCount}</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            id="refresh-btn"
+            type="button"
+            onClick={() => fetchReports(filters)}
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
+          >
+            {loading ? '⏳ Đang tải...' : '🔄 Làm mới dữ liệu'}
+          </button>
+        </div>
       </div>
 
-      {/* Map Container */}
-      <div className="flex-1">
+      <div className="flex-1 relative min-h-0">
         <MapView
           reports={reports}
           filters={filters}
-          selectedReport={selectedReport}
           loading={loading}
-          onMarkerClick={handleMarkerClick}
-          onNavigate={handleNavigate}
+          onMarkerClick={setSelectedReport}
+          onNavigate={(id) => router.push(`/report/${id}`)}
         />
       </div>
     </div>
   );
-}
+};

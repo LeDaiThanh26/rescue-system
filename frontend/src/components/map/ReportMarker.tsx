@@ -1,10 +1,33 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Marker, Popup } from 'react-leaflet';
-import type L from 'leaflet';
+import L from 'leaflet';
 import { Report } from '@/types/report';
 import { MarkerPopup } from './MarkerPopup';
+
+const PRIORITY_COLORS: Record<string, string> = {
+  HIGH: '#EF4444',
+  MEDIUM: '#F59E0B',
+  RESOLVED: '#22C55E',
+};
+
+function makeDivIcon(priority: string) {
+  const color = PRIORITY_COLORS[priority] ?? '#6B7280';
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+      <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 22 14 22S28 23.333 28 14C28 6.268 21.732 0 14 0z"
+            fill="${color}" stroke="white" stroke-width="2"/>
+      <circle cx="14" cy="14" r="5" fill="white"/>
+    </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [28, 36],
+    iconAnchor: [14, 36],
+    popupAnchor: [0, -36],
+  });
+}
 
 interface ReportMarkerProps {
   report: Report;
@@ -17,63 +40,21 @@ export const ReportMarker: React.FC<ReportMarkerProps> = ({
   onMarkerClick,
   onNavigate = () => {},
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const icon = useMemo(() => makeDivIcon(report.priority), [report.priority]);
 
-  const markerIcon = useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    
-    const getMarkerColor = (priority: string) => {
-      switch (priority) {
-        case 'HIGH':
-          return '#EF4444'; // Red
-        case 'MEDIUM':
-          return '#F97316'; // Orange
-        case 'LOW':
-          return '#22C55E'; // Green
-        default:
-          return '#6B7280'; // Gray
-      }
-    };
-
-    const color = getMarkerColor(report.priority);
-    const { Icon } = require('leaflet');
-    const icon = new Icon({
-      iconUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${encodeURIComponent(color)}'%3E%3Cpath d='M12 0C7.58 0 4 3.58 4 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z'/%3E%3C/svg%3E`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
-      shadowSize: [41, 41],
-      shadowAnchor: [13, 41],
-    });
-    return icon;
-  }, [report.priority]);
-
-  const handleClose = () => setIsOpen(false);
-
-  if (!markerIcon || !report.latitude || !report.longitude) {
-    return null;
-  }
+  if (!report.latitude || !report.longitude) return null;
 
   return (
     <Marker
       position={[report.latitude, report.longitude]}
-      icon={markerIcon}
+      icon={icon}
       eventHandlers={{
-        click: () => {
-          setIsOpen(true);
-          onMarkerClick?.(report);
-        },
+        click: () => onMarkerClick?.(report),
       }}
     >
-      {isOpen && (
-        <Popup>
-          <MarkerPopup
-            report={report}
-            onClose={() => setIsOpen(false)}
-            onNavigate={onNavigate}
-          />
-        </Popup>
-      )}
+      <Popup>
+        <MarkerPopup report={report} onNavigate={onNavigate} />
+      </Popup>
     </Marker>
   );
 };
