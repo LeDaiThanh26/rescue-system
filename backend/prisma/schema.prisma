@@ -14,7 +14,7 @@ enum UserRole {
 }
 
 enum MissionStatus {
-  EN_ROUTE
+  MOVING
   ON_SITE
   DONE
 }
@@ -61,7 +61,7 @@ model Mission {
   volunteerId   Int
   assignedById  Int
 
-  missionStatus MissionStatus @default(EN_ROUTE)
+  missionStatus MissionStatus @default(MOVING)
 
   startedAt     DateTime?
   completedAt   DateTime?
