@@ -11,6 +11,7 @@ const getMyMissions = async (req, res) => {
         const mapped = missions.map(m => ({
             id: m.id,
             status: m.missionStatus,
+            startedAt: m.startedAt,
             incident: m.incident ? {
                 id: m.incident.id,
                 message: m.incident.rawMessage,
@@ -32,7 +33,7 @@ const getMissionDetail = async (req, res) => {
 
     try {
         const mission = await MissionModel.getMissionById(id, volunteerId);
-        
+
         if (!mission) {
             return res.status(404).json({ error: "Không tìm thấy nhiệm vụ hoặc bạn không có quyền truy cập" });
         }
@@ -68,7 +69,7 @@ const acceptMission = async (req, res) => {
 
     try {
         const mission = await MissionModel.getMissionById(id, volunteerId);
-        
+
         if (!mission) {
             return res.status(404).json({ error: "Không tìm thấy nhiệm vụ hoặc bạn không có quyền truy cập" });
         }
@@ -78,7 +79,7 @@ const acceptMission = async (req, res) => {
         }
 
         const updatedMission = await MissionModel.acceptMission(id);
-        
+
         res.json({
             message: "Nhận nhiệm vụ thành công",
             mission: {
@@ -99,7 +100,7 @@ const rejectMission = async (req, res) => {
 
     try {
         const mission = await MissionModel.getMissionById(id, volunteerId);
-        
+
         if (!mission) {
             return res.status(404).json({ error: "Không tìm thấy nhiệm vụ hoặc bạn không có quyền truy cập" });
         }
@@ -109,7 +110,7 @@ const rejectMission = async (req, res) => {
         }
 
         await MissionModel.rejectMission(id);
-        
+
         res.json({ message: "Từ chối nhiệm vụ thành công. Sự cố đã được chuyển lại cho Admin phân công." });
     } catch (error) {
         console.error(error);
@@ -122,13 +123,13 @@ const updateMissionStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!["MOVING", "ON_SITE", "DONE"].includes(status)) {
+    if (!["EN_ROUTE", "ON_SITE", "DONE"].includes(status)) {
         return res.status(400).json({ error: "Trạng thái không hợp lệ" });
     }
 
     try {
         const mission = await MissionModel.getMissionById(id, volunteerId);
-        
+
         if (!mission) {
             return res.status(404).json({ error: "Không tìm thấy nhiệm vụ hoặc bạn không có quyền truy cập" });
         }
@@ -160,7 +161,7 @@ const updateLocation = async (req, res) => {
 
     try {
         const updatedUser = await VolunteerModel.updateLocation(volunteerId, location);
-        
+
         res.json({
             message: "Cập nhật vị trí thành công",
             location: updatedUser.currentLocation
@@ -173,21 +174,19 @@ const updateLocation = async (req, res) => {
 
 const streamMissions = (req, res) => {
     const volunteerId = req.user?.id || 2;
-    
-    // Thiết lập headers bắt buộc cho Server-Sent Events (SSE)
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders(); 
-
-    // Gửi sự kiện ping đầu tiên để báo kết nối thành công
+    res.flushHeaders();
     res.write(`data: {"type": "CONNECTED", "message": "SSE Connection Established"}\n\n`);
-
-    // Lưu connection của TNV này vào map
     sse.addClient(volunteerId, res);
-
-    // Xoá connection khi client đóng kết nối (đóng tab/mất mạng)
+    // THÊM ĐOẠN NÀY ĐỂ TEST: Ép Node.js tự bắn data sau 5 giây
+    const testInterval = setInterval(() => {
+        sse.notifyVolunteer(volunteerId, { message: "Tự động ping sau mỗi 5s" });
+    }, 5000);
     req.on('close', () => {
+        clearInterval(testInterval); // Xoá timer khi đóng
         sse.removeClient(volunteerId);
     });
 };

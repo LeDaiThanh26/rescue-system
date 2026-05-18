@@ -3,11 +3,11 @@ const VolunteerModel = require("../models/volunteer.model");
 const getVolunteers = async (req, res) => {
     try {
         const volunteers = await VolunteerModel.getVolunteersWithMissions();
-        
+
         const mapped = volunteers.map(v => {
-            const activeMissions = v.missions.filter(m => ["MOVING", "ON_SITE"].includes(m.missionStatus));
+            const activeMissions = v.missions.filter(m => ["EN_ROUTE", "ON_SITE"].includes(m.missionStatus));
             const completedMissions = v.missions.filter(m => m.missionStatus === "DONE");
-            
+
             return {
                 id: v.id,
                 username: v.username,
@@ -31,14 +31,14 @@ const getVolunteer = async (req, res) => {
     const { id } = req.params;
     try {
         const volunteer = await VolunteerModel.getVolunteerById(id);
-        
+
         if (!volunteer) {
             return res.status(404).json({ error: "Không tìm thấy tình nguyện viên" });
         }
-        
-        const activeMissions = volunteer.missions.filter(m => ["MOVING", "ON_SITE"].includes(m.missionStatus));
+
+        const activeMissions = volunteer.missions.filter(m => ["EN_ROUTE", "ON_SITE"].includes(m.missionStatus));
         const completedMissions = volunteer.missions.filter(m => m.missionStatus === "DONE");
-        
+
         const responseData = {
             id: volunteer.id,
             username: volunteer.username,
@@ -75,7 +75,7 @@ const getVolunteer = async (req, res) => {
 const getVolunteerLocations = async (req, res) => {
     try {
         const volunteers = await VolunteerModel.getVolunteerLocations();
-        
+
         const mapped = volunteers.map(v => {
             const activeMission = v.missions[0];
             return {
@@ -101,7 +101,7 @@ const getVolunteerLocations = async (req, res) => {
 const getIncidentLocations = async (req, res) => {
     try {
         const incidents = await VolunteerModel.getIncidentLocations();
-        
+
         const mapped = incidents.map(inc => ({
             id: inc.id,
             location: inc.geomLocation || null,

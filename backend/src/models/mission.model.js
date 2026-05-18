@@ -10,7 +10,7 @@ const getMissionsByVolunteerId = async (volunteerId) => {
 
 const getMissionById = async (missionId, volunteerId) => {
     return await prisma.mission.findFirst({
-        where: { 
+        where: {
             id: parseInt(missionId),
             volunteerId: parseInt(volunteerId)
         },
@@ -23,7 +23,7 @@ const acceptMission = async (missionId) => {
         where: { id: parseInt(missionId) },
         data: {
             startedAt: new Date(),
-            missionStatus: "MOVING"
+            missionStatus: "EN_ROUTE"
         }
     });
 };

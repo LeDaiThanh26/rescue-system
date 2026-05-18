@@ -30,7 +30,7 @@ const getVolunteerLocations = async () => {
         where: { role: "VOLUNTEER" },
         include: {
             missions: {
-                where: { missionStatus: { in: ["MOVING", "ON_SITE"] } },
+                where: { missionStatus: { in: ["EN_ROUTE", "ON_SITE"] } },
                 include: { incident: true }
             }
         }
@@ -59,7 +59,7 @@ const getVolunteerStats = async () => {
             role: "VOLUNTEER",
             missions: {
                 some: {
-                    missionStatus: { in: ["MOVING", "ON_SITE"] }
+                    missionStatus: { in: ["EN_ROUTE", "ON_SITE"] }
                 }
             }
         }
