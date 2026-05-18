@@ -176,62 +176,62 @@ app.get("/api/volunteers/:id", async (req, res) => {
     }
 });
 
-// Mock data for testing
+// Mock data for testing — tọa độ đã xác minh theo từng quận Đà Nẵng
 const mockReports = [
     {
         id: 1,
-        fullName: "Nguyễn Văn A",
+        fullName: "Nguyễn Văn An",
         phone: "0901234567",
-        latitude: 16.0544,
-        longitude: 108.2022,
+        latitude: 16.0472,   // Hải Châu
+        longitude: 108.2199,
         priority: "HIGH",
         status: "PENDING",
-        description: "Nhà bị ngập sâu 1m",
-        address: "123 Nguyễn Huệ, Quận 1, TP.HCM"
+        description: "Nhà bị ngập sâu 1m, cần hỗ trợ khẩn cấp",
+        address: "45 Trần Phú, Hải Châu, Đà Nẵng"
     },
     {
         id: 2,
-        fullName: "Trần Thị B",
+        fullName: "Trần Thị Bình",
         phone: "0912345678",
-        latitude: 16.0600,
-        longitude: 108.2100,
+        latitude: 16.1160,   // Sơn Trà
+        longitude: 108.2770,
         priority: "HIGH",
         status: "PENDING",
-        description: "Cần cấp cứu khẩn cấp",
-        address: "456 Lê Lợi, Quận 1, TP.HCM"
+        description: "Người già bị mắc kẹt, cần cấp cứu khẩn cấp",
+        address: "12 Ngô Quyền, Sơn Trà, Đà Nẵng"
     },
     {
         id: 3,
-        fullName: "Lê Văn C",
+        fullName: "Lê Văn Cường",
         phone: "0923456789",
-        latitude: 16.0480,
-        longitude: 108.1950,
+        latitude: 16.0038,   // Ngũ Hành Sơn
+        longitude: 108.2644,
         priority: "MEDIUM",
         status: "IN_PROGRESS",
-        description: "Mái nhà bị hư hỏng",
-        address: "789 Trần Hưng Đạo, Quận 1, TP.HCM"
+        description: "Mái nhà bị tốc hoàn toàn sau bão",
+        address: "78 Lê Văn Hiến, Ngũ Hành Sơn, Đà Nẵng"
     },
     {
         id: 4,
-        fullName: "Phạm Thị D",
+        fullName: "Phạm Thị Dung",
         phone: "0934567890",
-        latitude: 16.0650,
-        longitude: 108.2150,
+        latitude: 16.0673,   // Thanh Khê
+        longitude: 108.1846,
         priority: "MEDIUM",
         status: "PENDING",
-        description: "Cây đã đổ chắn đường",
-        address: "321 Ngô Quyền, Quận 1, TP.HCM"
+        description: "Cây đổ chắn đường, không thoát ra được",
+        address: "33 Điện Biên Phủ, Thanh Khê, Đà Nẵng"
     },
     {
         id: 5,
-        fullName: "Đinh Văn E",
+        fullName: "Đinh Văn Em",
         phone: "0945678901",
-        latitude: 16.0500,
-        longitude: 108.2000,
+        latitude: 16.1148,   // Liên Chiểu
+        longitude: 108.1243,
         priority: "LOW",
         status: "COMPLETED",
-        description: "Dọn vệ sinh sau bão",
-        address: "654 Hai Bà Trưng, Quận 1, TP.HCM"
+        description: "Dọn dẹp vệ sinh sau bão, cần nhân lực",
+        address: "201 Nguyễn Lương Bằng, Liên Chiểu, Đà Nẵng"
     }
 ];
 
