@@ -1,20 +1,11 @@
 "use client";
 
-/**
- * GoogleMap.tsx — Đã thay bằng Leaflet.js + OpenStreetMap (miễn phí 100%)
- *
- * Component này là wrapper bảo vệ SSR: Leaflet dùng window/document nên
- * phải import động với ssr:false để tránh lỗi trên Next.js server.
- */
-
 import dynamic from "next/dynamic";
 
-// ── Import động với SSR tắt — bắt buộc với Leaflet ─────────────────────────
 const LeafletMapClient = dynamic(
   () => import("@/components/features/report/LeafletMapClient"),
   {
     ssr: false,
-    // Skeleton hiển thị trong khi Leaflet đang load
     loading: () => (
       <div
         className="relative rounded-xl border border-slate-200 bg-slate-100 overflow-hidden flex items-center justify-center gap-2"

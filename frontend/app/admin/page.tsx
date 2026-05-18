@@ -15,7 +15,6 @@ export default function AdminPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Topbar */}
             <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
@@ -44,7 +43,6 @@ export default function AdminPage() {
                 </div>
             </header>
 
-            {/* Content */}
             <main className="max-w-6xl mx-auto px-6 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <StatCard label="Ca kêu cứu" value="0" color="red" />
@@ -58,7 +56,7 @@ export default function AdminPage() {
                     </h2>
                     <div className="text-sm text-gray-400 text-center py-12">
                         Chưa có dữ liệu
-                    </div>
+                     </div>
                 </div>
             </main>
         </div>

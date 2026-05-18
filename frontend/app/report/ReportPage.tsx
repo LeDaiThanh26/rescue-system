@@ -34,14 +34,11 @@ export default function ReportPage() {
       let lat = result.lat;
       let lng = result.lng;
 
-      // Nếu backend không geocode được (thiếu API key hoặc địa chỉ mơ hồ)
-      // → thử geocode lại từ frontend trước khi chuyển bước
       if ((lat === null || lng === null) && result.address && result.address !== "Không xác định") {
         const geo = await geocodeAddress(result.address);
         if (geo) {
           lat = geo.lat;
           lng = geo.lng;
-          // Cập nhật địa chỉ đã được Google chuẩn hóa
           setAddress(geo.formattedAddress);
         }
       }
@@ -59,7 +56,6 @@ export default function ReportPage() {
   const handleSubmit = async () => {
     if (!aiResult) return;
 
-    // Validate tọa độ — nếu người dùng chưa tìm tọa độ thì cảnh báo
     const latNum = parseFloat(editedLat);
     const lngNum = parseFloat(editedLng);
     const hasValidCoords = !isNaN(latNum) && !isNaN(lngNum) && editedLat !== "" && editedLng !== "";
@@ -69,7 +65,6 @@ export default function ReportPage() {
       return;
     }
 
-    // PostGIS WKT: POINT(lng lat) — theo chuẩn GeoJSON (X=lng, Y=lat)
     const geomLocation = `POINT(${lngNum} ${latNum})`;
 
     setIsSubmitting(true);
@@ -86,7 +81,6 @@ export default function ReportPage() {
       setCaseCode(data.caseCode);
       setStep("success");
     } catch {
-      // Cơ chế sinh mã dự phòng khi mất kết nối Backend Client
       const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       setCaseCode(`RES-${d}-${String(Math.floor(Math.random() * 9000) + 1000)}`);
       setStep("success");

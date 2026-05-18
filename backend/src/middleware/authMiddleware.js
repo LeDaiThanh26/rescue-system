@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 
-// Middleware xác thực token
 const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
@@ -18,7 +17,6 @@ const authenticate = (req, res, next) => {
     }
 };
 
-// Middleware phân quyền theo role
 const authorize = (...roles) => {
     return (req, res, next) => {
         if (!req.user) {

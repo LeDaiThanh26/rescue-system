@@ -29,7 +29,6 @@ export default function AddressConfirm({
   const [isGpsLocating, setIsGpsLocating] = useState(false);
   const [geocodeMsg, setGeocodeMsg] = useState<{ type: "ok" | "warn" | "err"; text: string } | null>(null);
 
-  // ── Re-geocode khi user nhấn nút "Tìm tọa độ" ──────────────────────────
   const handleReverseGeocode = async () => {
     if (!address || address === "Không xác định") {
       setGeocodeMsg({ type: "err", text: "Vui lòng nhập địa chỉ trước khi tìm tọa độ." });
@@ -58,7 +57,6 @@ export default function AddressConfirm({
     }
   };
 
-  // ── Lấy vị trí GPS của thiết bị ────────────────────────────────────────
   const handleGpsLocate = () => {
     if (!navigator.geolocation) {
       setGeocodeMsg({ type: "err", text: "Trình duyệt không hỗ trợ định vị GPS." });
@@ -71,7 +69,6 @@ export default function AddressConfirm({
         const { latitude, longitude } = pos.coords;
         onLatChange(latitude.toFixed(6));
         onLngChange(longitude.toFixed(6));
-        // Reverse geocode để lấy địa chỉ
         try {
           const addr = await reverseGeocode(latitude, longitude);
           if (addr) {
@@ -109,11 +106,8 @@ export default function AddressConfirm({
       </div>
 
       <div className="p-5 flex flex-col gap-4">
-
-        {/* ── Google Maps thật ───────────────────────────────────────────── */}
         <GoogleMap address={address} lat={lat} lng={lng} height={280} />
 
-        {/* ── Ô nhập địa chỉ + nút Tìm tọa độ ──────────────────────────── */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             Địa chỉ chi tiết
@@ -129,7 +123,6 @@ export default function AddressConfirm({
               placeholder="Số nhà, tên đường, thôn/xóm, phường/xã, tỉnh/thành..."
               className="flex-1 border-2 border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold outline-none focus:border-blue-500 transition-all"
             />
-            {/* Nút Tìm tọa độ */}
             <button
               type="button"
               onClick={handleReverseGeocode}
@@ -156,7 +149,6 @@ export default function AddressConfirm({
                 </>
               )}
             </button>
-            {/* Nút GPS */}
             <button
               type="button"
               onClick={handleGpsLocate}
@@ -183,7 +175,6 @@ export default function AddressConfirm({
             </button>
           </div>
 
-          {/* Thông báo geocode */}
           {geocodeMsg && (
             <p className={`text-xs font-medium px-1 ${
               geocodeMsg.type === "ok"   ? "text-green-600" :
@@ -195,7 +186,6 @@ export default function AddressConfirm({
           )}
         </div>
 
-        {/* ── Lat / Lng ──────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Vĩ độ (Latitude)</label>
@@ -221,7 +211,6 @@ export default function AddressConfirm({
           </div>
         </div>
 
-        {/* ── Hướng dẫn nhỏ ──────────────────────────────────────────────── */}
         <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-blue-800 leading-relaxed font-medium">
           <span className="flex-shrink-0 text-blue-500">💡</span>
           <span>
@@ -230,13 +219,11 @@ export default function AddressConfirm({
           </span>
         </div>
 
-        {/* ── Cảnh báo ───────────────────────────────────────────────────── */}
         <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-xs text-amber-900 leading-relaxed font-medium">
           <span className="flex-shrink-0 font-bold text-amber-600">⚠</span>
           <span>Đảm bảo địa chỉ và tọa độ chuẩn xác để xuồng/đội ứng cứu tiếp cận đúng vị trí nhà bạn trong điều kiện mưa lũ, ngập lụt khuất tầm nhìn.</span>
         </div>
 
-        {/* ── Tóm tắt ────────────────────────────────────────────────────── */}
         <div className="border border-slate-300 rounded-xl overflow-hidden divide-y divide-slate-300 bg-slate-50/50">
           {[
             { label: "Mức độ khẩn cấp", value: urgency.label, style: { color: urgency.color, fontWeight: "800" } },
@@ -250,7 +237,6 @@ export default function AddressConfirm({
           ))}
         </div>
 
-        {/* ── Actions ────────────────────────────────────────────────────── */}
         <div className="flex justify-end gap-3 pt-1">
           <button
             onClick={onBack}

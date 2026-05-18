@@ -15,7 +15,7 @@ export async function analyzeRescueText(text: string): Promise<AIResult> {
     urgency:    (data.urgency as UrgencyLevel) ?? "MEDIUM",
     needs:      data.needs      ?? ["Hỗ trợ sơ tán"],
     contact:    data.contact    ?? "Không có",
-    lat:        data.lat        ?? null,   // null nếu geocoding không thành công
+    lat:        data.lat        ?? null,
     lng:        data.lng        ?? null,
     confidence: data.confidence ?? 50,
     source:     data.source,

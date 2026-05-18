@@ -33,10 +33,7 @@ export default function LoginPage() {
                 return;
             }
 
-            // Lưu token + user vào localStorage
             saveAuth(data.token, data.user);
-
-            // Redirect theo role
             router.push(getHomeByRole(data.user.role));
         } catch {
             setError("Không thể kết nối đến server");
@@ -48,7 +45,6 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
             <div className="w-full max-w-md">
-                {/* Header */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
                         <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,13 +56,12 @@ export default function LoginPage() {
                     </div>
                     <h1 className="text-2xl font-semibold text-gray-900">
                         Hệ thống cứu trợ lũ lụt
-                    </h1>
+                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
                         Đăng nhập để tiếp tục
                     </p>
                 </div>
 
-                {/* Form */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
@@ -102,7 +97,6 @@ export default function LoginPage() {
                             />
                         </div>
 
-                        {/* Error */}
                         {error && (
                             <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
                                 <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -136,7 +130,6 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    {/* Role hint */}
                     <div className="mt-6 pt-5 border-t border-gray-100">
                         <p className="text-xs text-center text-gray-400 mb-3">Tài khoản test</p>
                         <div className="grid grid-cols-2 gap-2 text-xs">
