@@ -11,8 +11,7 @@ services:
       - "5000:5000"
     env_file:
       - ./backend/.env
-    depends_on:
-      - postgres
+
 
   ai-service:
     build: ./ai-service
@@ -24,19 +23,3 @@ services:
     ports:
       - "80:80"
 
-  postgres:
-    image: postgres:16
-
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: rescue_system
-
-    ports:
-      - "5432:5432"
-
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
