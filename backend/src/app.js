@@ -4,6 +4,9 @@ const prisma = require("./config/db");
 const reportRouter = require("./routes/report");
 const authRouter = require("./routes/auth");
 
+// Import routes
+const caseRoutes = require("./routes/case.routes");
+
 const app = express();
 
 app.use(cors());
@@ -17,10 +20,14 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/report", reportRouter);
 
+
+// Gắn route cho Admin Cases
+app.use("/api/admin/cases", caseRoutes);
+
 app.get("/", (req, res) => {
     res.json({ message: "Backend Running" });
 });
-
+    
 app.get("/test-db", async (req, res) => {
     try {
         const users = await prisma.user.findMany();

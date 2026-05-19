@@ -9,3 +9,6 @@ __pycache__/
 dist/
 build/
 .cache/
+backend/package-lock.json
+frontend/package-lock.json
+docker-compose.yml
