@@ -31,7 +31,7 @@ docker compose down -v
 | Frontend | http://localhost:3000 |
 | Backend | http://localhost:5000 |
 | AI Service | http://localhost:8000 |
-| Gateway | http://localhost:8080 |
+| Gateway | http://localhost |
 
 ---
 

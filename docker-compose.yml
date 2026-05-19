@@ -19,7 +19,6 @@ services:
       - ./backend/.env
     depends_on:
       - postgres
-    restart: unless-stopped
 
   ai-service:
     build: ./ai-service
@@ -31,11 +30,10 @@ services:
   gateway:
     build: ./gateway
     ports:
-      - "8080:80"
+      - "80:80"
 
   postgres:
     image: postgres:16
-    restart: unless-stopped
 
     environment:
       POSTGRES_USER: postgres
