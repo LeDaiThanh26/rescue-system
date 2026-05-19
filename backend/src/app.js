@@ -6,6 +6,11 @@ const authRouter = require("./routes/auth");
 
 const app = express();
 
+app.use(cors());
+app.use(express.json());
+
+app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/volunteer", require("./routes/volunteer.routes"));
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
