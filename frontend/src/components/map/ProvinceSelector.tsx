@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 interface ProvinceSelectorProps {
   value?: string;
@@ -8,22 +8,29 @@ interface ProvinceSelectorProps {
 }
 
 const VIETNAM_PROVINCES = [
-  'An Giang', 'Bà Rịa - Vũng Tàu', 'Bạc Liêu', 'Bắc Giang', 'Bắc Kạn',
-  'Bắc Ninh', 'Bến Tre', 'Bình Dương', 'Bình Định', 'Bình Phước',
-  'Bình Thuận', 'Cà Mau', 'Cần Thơ', 'Cao Bằng', 'Đà Nẵng',
-  'Đắk Lắk', 'Đắk Nông', 'Điện Biên', 'Đồng Nai', 'Đồng Tháp',
-  'Gia Lai', 'Hà Giang', 'Hà Nam', 'Hà Nội', 'Hà Tĩnh',
-  'Hải Dương', 'Hải Phòng', 'Hậu Giang', 'Hòa Bình', 'Hưng Yên',
-  'Khánh Hòa', 'Kiên Giang', 'Kon Tum', 'Lai Châu', 'Lâm Đồng',
-  'Lạng Sơn', 'Lào Cai', 'Long An', 'Nam Định', 'Nghệ An',
-  'Ninh Bình', 'Ninh Thuận', 'Phú Thọ', 'Phú Yên', 'Quảng Bình',
-  'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh', 'Quảng Trị', 'Sóc Trăng',
-  'Sơn La', 'Tây Ninh', 'Thái Bình', 'Thái Nguyên', 'Thanh Hóa',
-  'Thừa Thiên Huế', 'Tiền Giang', 'TP. Hồ Chí Minh', 'Trà Vinh', 'Tuyên Quang',
-  'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái',
+  // Đông bằng sông Hồng
+  'TP Hà Nội', 'TP Hải Phòng', 'Bắc Ninh', 'Hưng Yên', 'Ninh Bình', 'Quảng Ninh',
+  // Trung du và miền núi phía Bắc
+  'Cao Bằng', 'Điện Biên', 'Lai Châu', 'Lạng Sơn', 'Lào Cai', 'Phú Thọ', 'Sơn La', 'Thái Nguyên', 'Tuyên Quang',
+  // Bắc Trung Bộ
+  'TP Huế', 'Hà Tĩnh', 'Nghệ An', 'Quảng Trị', 'Thanh Hóa',
+  // Duyên hải Nam Trung Bộ
+  'TP Đà Nẵng', 'Đắk Lắk', 'Gia Lai', 'Khánh Hòa', 'Lâm Đồng', 'Quảng Ngãi',
+  // Đông Nam Bộ
+  'TP Đông Nai', 'TP Hồ Chí Minh', 'Tây Ninh',
+  // Đông bằng sông Cửu Long
+  'TP Cần Thơ', 'An Giang', 'Cà Mau', 'Đồng Tháp', 'Vĩnh Long',
+  // Các tỉnh còn lại
+  'Bà Rịa - Vũng Tàu', 'Bạc Liêu', 'Bắc Giang', 'Bắc Kạn', 'Bến Tre', 'Bình Dương', 'Bình Định', 'Bình Phước',
+  'Bình Thuận', 'Hà Giang', 'Hà Nam', 'Hòa Bình', 'Kiên Giang', 'Kon Tum', 'Long An',
+  'Nam Định', 'Ninh Thuận', 'Phú Yên', 'Quảng Bình', 'Quảng Nam', 'Sóc Trăng', 'Tiền Giang', 'Trà Vinh', 'Vĩnh Phúc', 'Yên Bái',
 ];
 
-export const ProvinceSelector: React.FC<ProvinceSelectorProps> = ({ value, onChange }) => {
+export const ProvinceSelector: React.FC<ProvinceSelectorProps> = React.memo(({ value, onChange }) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    onChange(e.target.value);
+  }, [onChange]);
+
   return (
     <div>
       <label className="block font-semibold text-sm text-gray-700 mb-1">
@@ -32,7 +39,7 @@ export const ProvinceSelector: React.FC<ProvinceSelectorProps> = ({ value, onCha
       <select
         id="province-selector"
         value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={handleChange}
         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
       >
         <option value="">-- Tất cả tỉnh/thành --</option>
@@ -44,4 +51,6 @@ export const ProvinceSelector: React.FC<ProvinceSelectorProps> = ({ value, onCha
       </select>
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  return prevProps.value === nextProps.value && prevProps.onChange === nextProps.onChange;
+});

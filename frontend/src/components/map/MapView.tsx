@@ -31,22 +31,37 @@ const VIETNAM_BOUNDS: L.LatLngBoundsExpression = [
 
 function FitBounds({ reports }: { reports: Report[] }) {
   const map = useMap();
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (reports.length === 0) {
-      map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
-      return;
-    }
-    const bounds = L.latLngBounds(
-      reports.map((r) => [r.latitude, r.longitude] as [number, number])
-    );
-    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14 });
+    // Debounce fitBounds to prevent excessive re-centering
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    timeoutRef.current = setTimeout(() => {
+      if (reports.length === 0) {
+        map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+        return;
+      }
+      const validReports = reports.filter((r) => r.latitude && r.longitude);
+      if (validReports.length === 0) {
+        map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+        return;
+      }
+      const bounds = L.latLngBounds(
+        validReports.map((r) => [r.latitude, r.longitude] as [number, number])
+      );
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14 });
+    }, 200); // 200ms debounce for smooth animation
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [reports, map]);
 
   return null;
 }
 
-export const MapView: React.FC<MapViewProps> = ({
+export const MapView: React.FC<MapViewProps> = React.memo(({
   reports,
   filters,
   loading,
@@ -115,4 +130,11 @@ export const MapView: React.FC<MapViewProps> = ({
       </MapContainer>
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom memo comparison for better performance
+  return (
+    prevProps.reports === nextProps.reports &&
+    JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters) &&
+    prevProps.loading === nextProps.loading
+  );
+});

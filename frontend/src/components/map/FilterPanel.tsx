@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ReportFilter } from '@/types/report';
 import { ProvinceSelector } from './ProvinceSelector';
 
@@ -22,13 +22,13 @@ const CATEGORY_OPTIONS = ['Y tế', 'Lương thực', 'Nhà ở', 'Cơ sở hạ
 export const FilterPanel: React.FC<{
   filters: ReportFilter;
   onFiltersChange: (filters: ReportFilter) => void;
-}> = ({ filters, onFiltersChange }) => {
-  const toggleField = (field: keyof ReportFilter, value: string) => {
+}> = React.memo(({ filters, onFiltersChange }) => {
+  const toggleField = useCallback((field: keyof ReportFilter, value: string) => {
     onFiltersChange({
       ...filters,
       [field]: filters[field] === value ? undefined : value,
     });
-  };
+  }, [filters, onFiltersChange]);
 
   const hasActiveFilters =
     !!filters.province ||
@@ -137,4 +137,8 @@ export const FilterPanel: React.FC<{
       </button>
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Only re-render if filters or callback changed
+  return JSON.stringify(prevProps.filters) === JSON.stringify(nextProps.filters) &&
+         prevProps.onFiltersChange === nextProps.onFiltersChange;
+});

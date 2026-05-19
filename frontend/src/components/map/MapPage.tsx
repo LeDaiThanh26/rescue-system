@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { Report, ReportFilter } from '@/types/report';
 import { reportService } from '@/services/reportService';
@@ -21,16 +21,32 @@ const MapView = dynamic(
   }
 );
 
+// Debounce helper
+function useDebounce<T>(value: T, delay: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export default function MapPage() {
   const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
-  const [filters, setFilters] = useState<ReportFilter>({});
+  const [pendingFilters, setPendingFilters] = useState<ReportFilter>({});
+  const filters = useDebounce(pendingFilters, 300); // 300ms debounce
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [, setSelectedReport] = useState<Report | null>(null);
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchReports = async (activeFilters: ReportFilter) => {
+  const fetchReports = useCallback(async (activeFilters: ReportFilter) => {
     setLoading(true);
     setError(null);
     try {
@@ -44,27 +60,34 @@ export default function MapPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // UC01 + auto-refresh 30s (doc §5.1)
+  // UC01 + auto-refresh 60s (doc §5.1) - increased interval for performance
   useEffect(() => {
     fetchReports(filters);
 
     refreshIntervalRef.current = setInterval(() => {
       fetchReports(filters);
-    }, 30000);
+    }, 60000);
 
     return () => {
       if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
     };
-  }, [filters]);
+  }, [filters, fetchReports]);
 
   const displayed = useMemo(() => applyClientFilters(reports, filters), [reports, filters]);
 
-  const highCount = displayed.filter((r) => r.priority === 'HIGH').length;
-  const mediumCount = displayed.filter((r) => r.priority === 'MEDIUM').length;
-  const resolvedCount = displayed.filter((r) => r.priority === 'RESOLVED').length;
-  const pendingCount = displayed.filter((r) => r.status === 'PENDING').length;
+  const stats = useMemo(() => ({
+    total: displayed.length,
+    highCount: displayed.filter((r) => r.priority === 'HIGH').length,
+    mediumCount: displayed.filter((r) => r.priority === 'MEDIUM').length,
+    resolvedCount: displayed.filter((r) => r.priority === 'RESOLVED').length,
+    pendingCount: displayed.filter((r) => r.status === 'PENDING').length,
+  }), [displayed]);
+
+  const handleFilterChange = useCallback((newFilters: ReportFilter) => {
+    setPendingFilters(newFilters);
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
@@ -75,7 +98,7 @@ export default function MapPage() {
         </div>
 
         <div className="p-4 space-y-4 flex-1">
-          <FilterPanel filters={filters} onFiltersChange={setFilters} />
+          <FilterPanel filters={pendingFilters} onFiltersChange={handleFilterChange} />
           <CaseTracker />
 
           {error && (
@@ -89,23 +112,23 @@ export default function MapPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Tổng yêu cầu</span>
-                <span className="font-bold text-gray-800">{displayed.length}</span>
+                <span className="font-bold text-gray-800">{stats.total}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-red-600">🔴 Khẩn cấp</span>
-                <span className="font-bold text-red-600">{highCount}</span>
+                <span className="font-bold text-red-600">{stats.highCount}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-yellow-600">🟡 Cần tiếp tế</span>
-                <span className="font-bold text-yellow-600">{mediumCount}</span>
+                <span className="font-bold text-yellow-600">{stats.mediumCount}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-green-600">🟢 Đã xử lý</span>
-                <span className="font-bold text-green-600">{resolvedCount}</span>
+                <span className="font-bold text-green-600">{stats.resolvedCount}</span>
               </div>
               <div className="border-t pt-2 flex justify-between">
                 <span className="text-gray-600">⏳ Chờ xử lý</span>
-                <span className="font-bold text-orange-600">{pendingCount}</span>
+                <span className="font-bold text-orange-600">{stats.pendingCount}</span>
               </div>
             </div>
           </div>
@@ -117,7 +140,7 @@ export default function MapPage() {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition text-sm"
           >
-            {loading ? '⏳ Đang tải...' : '🔄 Làm mới dữ liệu'}
+            {loading ? '⏳ Đang tải...' : '🔄 Làm mới'}
           </button>
         </div>
       </div>

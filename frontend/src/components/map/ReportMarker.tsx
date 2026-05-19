@@ -12,7 +12,14 @@ const PRIORITY_COLORS: Record<string, string> = {
   RESOLVED: '#22C55E',
 };
 
+// Memoize icon creation to prevent re-rendering
+const iconCache = new Map<string, L.DivIcon>();
+
 function makeDivIcon(priority: string) {
+  if (iconCache.has(priority)) {
+    return iconCache.get(priority)!;
+  }
+
   const color = PRIORITY_COLORS[priority] ?? '#6B7280';
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
@@ -20,13 +27,15 @@ function makeDivIcon(priority: string) {
             fill="${color}" stroke="white" stroke-width="2"/>
       <circle cx="14" cy="14" r="5" fill="white"/>
     </svg>`;
-  return L.divIcon({
+  const icon = L.divIcon({
     html: svg,
     className: '',
     iconSize: [28, 36],
     iconAnchor: [14, 36],
     popupAnchor: [0, -36],
   });
+  iconCache.set(priority, icon);
+  return icon;
 }
 
 interface ReportMarkerProps {
@@ -35,7 +44,7 @@ interface ReportMarkerProps {
   onNavigate?: (reportId: number) => void;
 }
 
-export const ReportMarker: React.FC<ReportMarkerProps> = ({
+export const ReportMarker: React.FC<ReportMarkerProps> = React.memo(({
   report,
   onMarkerClick,
   onNavigate = () => {},
@@ -57,4 +66,14 @@ export const ReportMarker: React.FC<ReportMarkerProps> = ({
       </Popup>
     </Marker>
   );
-};
+}, (prevProps, nextProps) => {
+  // Only re-render if report data significantly changed
+  return (
+    prevProps.report.id === nextProps.report.id &&
+    prevProps.report.latitude === nextProps.report.latitude &&
+    prevProps.report.longitude === nextProps.report.longitude &&
+    prevProps.report.priority === nextProps.report.priority &&
+    prevProps.onMarkerClick === nextProps.onMarkerClick &&
+    prevProps.onNavigate === nextProps.onNavigate
+  );
+});
