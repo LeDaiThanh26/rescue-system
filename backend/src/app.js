@@ -2,7 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const prisma = require("./config/db");
 const mapRoutes = require("./routes/mapRoutes");
-
+const reportRouter = require("./routes/report");
+const authRouter = require("./routes/auth");
 // Import routes
 const caseRoutes = require("./routes/case.routes");
 
