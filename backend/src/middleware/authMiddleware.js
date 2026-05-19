@@ -1,14 +1,20 @@
 const jwt = require("jsonwebtoken");
 
 const authenticate = (req, res, next) => {
+    let token = null;
     const authHeader = req.headers.authorization;
 
-    if (!authHeader?.startsWith("Bearer ")) {
+    if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+    } else if (req.query?.token) {
+        token = req.query.token;
+    }
+
+    if (!token) {
         return res.status(401).json({ error: "Không có token xác thực" });
     }
 
     try {
-        const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
         next();

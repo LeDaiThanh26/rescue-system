@@ -3,6 +3,9 @@ const cors = require("cors");
 const prisma = require("./config/db");
 const mapRoutes = require("./routes/mapRoutes");
 
+// Import routes
+const caseRoutes = require("./routes/case.routes");
+
 const app = express();
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -15,10 +18,17 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/volunteer", require("./routes/volunteer.routes"));
+
+
+// Gắn route cho Admin Cases
+app.use("/api/admin/cases", caseRoutes);
+
 app.get("/", (req, res) => {
     res.json({ message: "Backend Running" });
 });
-
+    
 app.get("/test-db", async (req, res) => {
     try {
         const users = await prisma.user.findMany();

@@ -4,14 +4,20 @@ services:
     build: ./frontend
     ports:
       - "3000:3000"
-    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
   backend:
     build: ./backend
     ports:
       - "5000:5000"
-    env_file:
-      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://postgres:123456@postgres:5432/rescue_system
+      - JWT_SECRET=rescue_system_secret_key_123
     depends_on:
       - postgres
     restart: unless-stopped
