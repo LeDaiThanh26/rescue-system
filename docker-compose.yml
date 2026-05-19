@@ -4,6 +4,9 @@ services:
     build: ./frontend
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
   backend:
     build: ./backend
@@ -12,14 +15,42 @@ services:
     env_file:
       - ./backend/.env
 
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://postgres:123456@postgres:5432/rescue_system
+      - JWT_SECRET=rescue_system_secret_key_123
+    depends_on:
+      - postgres
+    restart: unless-stopped
 
   ai-service:
     build: ./ai-service
     ports:
       - "8000:8000"
+    env_file:
+      - ./ai-service/.env
 
   gateway:
     build: ./gateway
     ports:
-      - "80:80"
+      - "8080:80"
 
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: rescue_system
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
