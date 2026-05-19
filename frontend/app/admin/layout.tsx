@@ -38,21 +38,19 @@ export default function AdminLayout({
           <nav className="flex-1 px-4 space-y-2 mt-6">
             <Link
               href="/admin"
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${
-                pathname === "/admin"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${pathname === "/admin"
                   ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
                   : "hover:bg-slate-800 hover:text-white"
-              }`}
+                }`}
             >
               <LayoutDashboard size={20} /> Tổng quan (Dashboard)
             </Link>
             <Link
               href="/admin/volunteers"
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${
-                pathname.startsWith("/admin/volunteers")
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${pathname.startsWith("/admin/volunteers")
                   ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
                   : "hover:bg-slate-800 hover:text-white"
-              }`}
+                }`}
             >
               <Users size={20} /> Tình nguyện viên
             </Link>
@@ -79,7 +77,7 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="p-6 md:p-10 flex-1 overflow-y-auto">
         {children}
       </main>
     </div>
