@@ -4,8 +4,11 @@ import React, { useState, useEffect } from "react";
 import { Users, Clock, CheckCircle, MapPin, ShieldCheck, RefreshCw, Eye, MapIcon } from "lucide-react";
 import Link from "next/link";
 import MapWrapper from "../../../components/MapWrapper";
+import { useAuth } from "@/lib/useAuth";
+import { getToken } from "@/lib/auth";
 
 export default function AdminVolunteersPage() {
+  const { user, loading: authLoading } = useAuth("ADMIN");
   const [volunteers, setVolunteers] = useState<any[]>([]);
   const [mapVols, setMapVols] = useState<any[]>([]);
   const [mapIncs, setMapIncs] = useState<any[]>([]);
@@ -14,10 +17,12 @@ export default function AdminVolunteersPage() {
 
   const fetchAllData = async () => {
     try {
+      const token = getToken();
+      const headers = { Authorization: `Bearer ${token}` };
       const [volRes, locRes, incRes] = await Promise.all([
-        fetch("http://localhost:5000/api/admin/volunteers"),
-        fetch("http://localhost:5000/api/admin/volunteers/locations"),
-        fetch("http://localhost:5000/api/admin/volunteers/incidents_lo")
+        fetch("http://localhost:5000/api/admin/volunteers", { headers }),
+        fetch("http://localhost:5000/api/admin/volunteers/locations", { headers }),
+        fetch("http://localhost:5000/api/admin/volunteers/incidents_lo", { headers })
       ]);
       setVolunteers(await volRes.json());
       setMapVols(await locRes.json());
@@ -30,10 +35,13 @@ export default function AdminVolunteersPage() {
   };
 
   useEffect(() => {
+    if (authLoading) return;
     fetchAllData();
     const interval = setInterval(fetchAllData, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [authLoading]);
+
+  if (authLoading || loading) return <div className="p-10 text-center font-medium text-slate-500">Đang tải danh sách...</div>;
 
   return (
     <>

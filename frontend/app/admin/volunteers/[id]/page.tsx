@@ -3,16 +3,25 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, User, MapPin, CheckCircle, Clock } from "lucide-react";
+import { useAuth } from "@/lib/useAuth";
+import { getToken } from "@/lib/auth";
 
 export default function VolunteerDetailPage() {
+  const { user, loading: authLoading } = useAuth("ADMIN");
   const { id } = useParams();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
     const fetchDetail = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/admin/volunteers/${id}`);
+        const token = getToken();
+        const res = await fetch(`http://localhost:5000/api/admin/volunteers/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         setData(await res.json());
       } catch (error) {
         console.error(error);
@@ -21,9 +30,9 @@ export default function VolunteerDetailPage() {
       }
     };
     fetchDetail();
-  }, [id]);
+  }, [id, authLoading]);
 
-  if (loading) return <div className="p-10 text-center font-medium text-slate-500">Đang tải chi tiết...</div>;
+  if (authLoading || loading) return <div className="p-10 text-center font-medium text-slate-500">Đang tải chi tiết...</div>;
   if (!data) return <div className="p-10 text-center text-red-500">Không tìm thấy thông tin TNV</div>;
 
   return (

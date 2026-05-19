@@ -1,6 +1,10 @@
 const express = require("express");
 const volunteerController = require("../controllers/volunteer.controller");
+const { authenticate, authorize } = require("../middleware/authMiddleware");
 const router = express.Router();
+
+router.use(authenticate);
+router.use(authorize("VOLUNTEER"));
 
 router.get("/missions", volunteerController.getMyMissions);
 router.get("/stream", volunteerController.streamMissions);

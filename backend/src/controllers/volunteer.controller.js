@@ -9,7 +9,7 @@ const handleError = (res, error) => {
 
 const getMyMissions = async (req, res) => {
     try {
-        const missions = await MissionService.getMissionsByVolunteerId(req.user?.id || 2);
+        const missions = await MissionService.getMissionsByVolunteerId(req.user.id);
         res.json(missions.map(m => ({
             id: m.id, status: m.missionStatus, startedAt: m.startedAt,
             incident: m.incident ? { id: m.incident.id, message: m.incident.rawMessage, urgency: m.incident.urgencyLevel, address: m.incident.aiAddress || "Chưa có địa chỉ" } : null
@@ -19,7 +19,7 @@ const getMyMissions = async (req, res) => {
 
 const getMissionDetail = async (req, res) => {
     try {
-        const mission = await MissionService.getMissionById(req.params.id, req.user?.id || 2);
+        const mission = await MissionService.getMissionById(req.params.id, req.user.id);
         if (!mission) return res.status(404).json({ error: "Không tìm thấy nhiệm vụ hoặc bạn không có quyền truy cập" });
         res.json({
             id: mission.id, status: mission.missionStatus, assignedById: mission.assignedById, startedAt: mission.startedAt, completedAt: mission.completedAt,
@@ -30,7 +30,7 @@ const getMissionDetail = async (req, res) => {
 
 const acceptMission = async (req, res) => {
     try {
-        const mission = await MissionService.getMissionById(req.params.id, req.user?.id || 2);
+        const mission = await MissionService.getMissionById(req.params.id, req.user.id);
         if (!mission) return res.status(404).json({ error: "Không tìm thấy nhiệm vụ hoặc bạn không có quyền truy cập" });
         if (mission.startedAt) return res.status(400).json({ error: "Nhiệm vụ này đã được nhận từ trước" });
         const updatedMission = await MissionService.acceptMission(req.params.id);
@@ -40,7 +40,7 @@ const acceptMission = async (req, res) => {
 
 const rejectMission = async (req, res) => {
     try {
-        const mission = await MissionService.getMissionById(req.params.id, req.user?.id || 2);
+        const mission = await MissionService.getMissionById(req.params.id, req.user.id);
         if (!mission) return res.status(404).json({ error: "Không tìm thấy nhiệm vụ hoặc bạn không có quyền truy cập" });
         if (mission.startedAt) return res.status(400).json({ error: "Không thể từ chối nhiệm vụ đã bắt đầu thực hiện" });
         await MissionService.rejectMission(req.params.id);
@@ -52,7 +52,7 @@ const updateMissionStatus = async (req, res) => {
     const { status } = req.body;
     if (!["EN_ROUTE", "ON_SITE", "DONE"].includes(status)) return res.status(400).json({ error: "Trạng thái không hợp lệ" });
     try {
-        const mission = await MissionService.getMissionById(req.params.id, req.user?.id || 2);
+        const mission = await MissionService.getMissionById(req.params.id, req.user.id);
         if (!mission) return res.status(404).json({ error: "Không tìm thấy nhiệm vụ hoặc bạn không có quyền truy cập" });
         const result = await MissionService.updateMissionStatus(req.params.id, mission.incidentId, status);
         const updatedMission = Array.isArray(result) ? result[0] : result;
@@ -63,13 +63,13 @@ const updateMissionStatus = async (req, res) => {
 const updateLocation = async (req, res) => {
     if (!req.body.location) return res.status(400).json({ error: "Vị trí không hợp lệ" });
     try {
-        const updatedUser = await VolunteerService.updateLocation(req.user?.id || 2, req.body.location);
+        const updatedUser = await VolunteerService.updateLocation(req.user.id, req.body.location);
         res.json({ message: "Cập nhật vị trí thành công", location: updatedUser.currentLocation });
     } catch (error) { handleError(res, error); }
 };
 
 const streamMissions = (req, res) => {
-    const volunteerId = req.user?.id || 2;
+    const volunteerId = req.user.id;
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');

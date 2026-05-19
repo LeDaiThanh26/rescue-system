@@ -3,8 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Navigation, CheckCircle2, ShieldAlert, ArrowRight, X } from "lucide-react";
 import MapWrapper from "../../components/MapWrapper";
+import { useAuth } from "@/lib/useAuth";
+import { getToken } from "@/lib/auth";
 
 export default function VolunteerDashboard() {
+  const { user, loading: authLoading, logout } = useAuth("VOLUNTEER");
   const [missions, setMissions] = useState<any[]>([]);
   const [missionDetail, setMissionDetail] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -12,7 +15,12 @@ export default function VolunteerDashboard() {
 
   const fetchMissions = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/volunteer/missions");
+      const token = getToken();
+      const res = await fetch("http://localhost:5000/api/volunteer/missions", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       setMissions(await res.json());
     } catch (error) {
       console.error(error);
@@ -22,25 +30,32 @@ export default function VolunteerDashboard() {
   };
 
   useEffect(() => {
+    if (authLoading) return;
     fetchMissions();
-    const evtSource = new EventSource("http://localhost:5000/api/volunteer/stream");
+    const token = getToken();
+    const evtSource = new EventSource(`http://localhost:5000/api/volunteer/stream?token=${token}`);
     evtSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === "NEW_MISSION") fetchMissions();
     };
     return () => evtSource.close();
-  }, []);
+  }, [authLoading]);
 
   useEffect(() => {
+    if (authLoading) return;
     let watchId: number;
     if (navigator.geolocation) {
       watchId = navigator.geolocation.watchPosition(
         (pos) => {
           const locString = `${pos.coords.latitude}, ${pos.coords.longitude}`;
           setCurrentLoc(locString);
+          const token = getToken();
           fetch("http://localhost:5000/api/volunteer/location", {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
             body: JSON.stringify({ location: locString })
           }).catch(console.error);
         },
@@ -51,12 +66,17 @@ export default function VolunteerDashboard() {
     return () => {
       if (watchId) navigator.geolocation.clearWatch(watchId);
     };
-  }, []);
+  }, [authLoading]);
 
   const activeMission = missions.find(m => m.startedAt && m.status !== "DONE");
   useEffect(() => {
     if (activeMission) {
-      fetch(`http://localhost:5000/api/volunteer/missions/${activeMission.id}`)
+      const token = getToken();
+      fetch(`http://localhost:5000/api/volunteer/missions/${activeMission.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
         .then(res => res.json())
         .then(data => setMissionDetail(data));
     } else {
@@ -67,9 +87,13 @@ export default function VolunteerDashboard() {
   const handleAction = async (id: number, action: string, status?: string) => {
     const url = `http://localhost:5000/api/volunteer/missions/${id}/${action}`;
     try {
+      const token = getToken();
       await fetch(url, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
         body: status ? JSON.stringify({ status }) : null
       });
       fetchMissions();
@@ -78,7 +102,7 @@ export default function VolunteerDashboard() {
     }
   };
 
-  if (loading) return <div className="flex h-screen items-center justify-center font-medium">Đang tải...</div>;
+  if (authLoading || loading) return <div className="flex h-screen items-center justify-center font-medium">Đang tải...</div>;
   const pendingMissions = missions.filter(m => !m.startedAt && m.status !== "DONE");
 
   const mapVols = [{ location: currentLoc, name: "Vị trí của bạn" }];
@@ -101,16 +125,22 @@ export default function VolunteerDashboard() {
     <div className="bg-slate-100 min-h-[100dvh] flex items-center justify-center md:p-6 fixed md:relative inset-0 overflow-hidden">
       <div className="w-full h-full md:h-[800px] md:max-w-[400px] bg-slate-50 md:rounded-[2.5rem] md:border-[10px] md:border-slate-800 shadow-2xl overflow-hidden flex flex-col relative font-sans">
 
-        <header className="bg-blue-600 text-white p-5 shadow-md shrink-0 relative z-20">
+        <header className="bg-blue-600 text-white p-5 shadow-md shrink-0 relative z-20 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
               <ShieldAlert size={20} className="text-white" />
             </div>
             <div>
               <h1 className="font-bold text-lg leading-tight">Cứu Hộ Nhanh</h1>
-              <p className="text-blue-200 text-xs">Sẵn sàng nhận nhiệm vụ</p>
+              <p className="text-blue-200 text-xs">{user?.fullName || "Sẵn sàng nhận nhiệm vụ"}</p>
             </div>
           </div>
+          <button 
+            onClick={logout} 
+            className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/20 transition font-bold"
+          >
+            Đăng xuất
+          </button>
         </header>
 
         <div className="h-[250px] w-full shrink-0 relative z-0 border-b border-slate-200 bg-slate-200">
