@@ -34,12 +34,14 @@ app.use("/api/auth", authRouter);
 
 app.use("/api/report", reportRouter);
 
+// Admin Cases
+app.use("/api/admin/cases", caseRoutes);
+
 app.use("/api/admin", require("./routes/admin.routes"));
 
 app.use("/api/volunteer", require("./routes/volunteer.routes"));
 
-// Admin Cases
-app.use("/api/admin/cases", caseRoutes);
+
 
 // Map routes
 app.use("/api", mapRoutes);

@@ -54,6 +54,59 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.register = async (req, res) => {
+    const { username, password, fullName } = req.body;
+
+    if (!username || !password || !fullName) {
+        return res.status(400).json({ error: "Thiếu thông tin đăng ký" });
+    }
+
+    try {
+        const existingUser = await prisma.user.findUnique({
+            where: { username },
+        });
+
+        if (existingUser) {
+            return res.status(400).json({ error: "Tên đăng nhập đã tồn tại" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await prisma.user.create({
+            data: {
+                username,
+                passwordHash: hashedPassword,
+                fullName,
+                role: "VOLUNTEER", // Default to VOLUNTEER
+            },
+        });
+
+        const token = jwt.sign(
+            {
+                id: user.id,
+                username: user.username,
+                role: user.role,
+                fullName: user.fullName,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        return res.status(201).json({
+            message: "Đăng ký thành công",
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                fullName: user.fullName,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        console.error("Register error:", error);
+        return res.status(500).json({ error: "Lỗi server" });
+    }
+};
+
 exports.seed = async (req, res) => {
     if (process.env.NODE_ENV === "production") {
         return res.status(403).json({ error: "Không khả dụng trên production" });

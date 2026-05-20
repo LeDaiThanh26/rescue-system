@@ -17,7 +17,8 @@ export default function VolunteerDetailPage() {
     const fetchDetail = async () => {
       try {
         const token = getToken();
-        const res = await fetch(`http://localhost:5000/api/admin/volunteers/${id}`, {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const res = await fetch(`${baseUrl}/api/admin/volunteers/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

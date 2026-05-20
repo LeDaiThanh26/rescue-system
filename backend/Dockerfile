@@ -12,4 +12,4 @@ RUN npx prisma generate
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && npm run dev"]
+CMD ["sh", "-c", "npx prisma db push && npm run dev"]

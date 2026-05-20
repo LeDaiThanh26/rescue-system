@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { Report, ReportFilter, ReportPayload, ReportResponse } from '@/types/report';
 import { applyClientFilters } from '@/utils/mapFilters';
-import MOCK_DATA from '@/data/mockReports.json';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -10,20 +9,18 @@ const apiClient = axios.create({
   timeout: 10000,
 });
 
-const MOCK_REPORTS: Report[] = MOCK_DATA as Report[];
-
 export const reportService = {
   // UC01 – GET /api/reports
   getAllReports: async (): Promise<Report[]> => {
     try {
       const response = await apiClient.get<Report[]>('/reports');
-      if (Array.isArray(response.data) && response.data.length > 0) {
+      if (Array.isArray(response.data)) {
         return response.data;
       }
-      return MOCK_REPORTS;
+      return [];
     } catch {
-      console.warn('Backend không kết nối được, dùng mock data');
-      return MOCK_REPORTS;
+      console.warn('Backend không kết nối được, trả về mảng rỗng');
+      return [];
     }
   },
 
@@ -34,10 +31,10 @@ export const reportService = {
       if (Array.isArray(response.data)) {
         return response.data;
       }
-      return MOCK_REPORTS;
+      return [];
     } catch {
-      console.warn('Error filtering reports, dùng mock data');
-      return applyClientFilters(MOCK_REPORTS, filters);
+      console.warn('Error filtering reports, trả về mảng rỗng');
+      return [];
     }
   },
 
@@ -48,7 +45,7 @@ export const reportService = {
       const response = await apiClient.get<Report>(`/reports/${id}`);
       return response.data;
     } catch {
-      return MOCK_REPORTS.find((r) => r.id === id) || null;
+      return null;
     }
   },
 
@@ -60,11 +57,7 @@ export const reportService = {
       );
       return response.data;
     } catch {
-      return (
-        MOCK_REPORTS.find(
-          (r) => r.caseCode.toLowerCase() === caseCode.toLowerCase()
-        ) || null
-      );
+      return null;
     }
   },
 

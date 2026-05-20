@@ -13,7 +13,8 @@ export default function CaseDetail() {
 
   useEffect(() => {
     const fetchDetail = async () => {
-      const res = await fetch(`http://localhost:5000/api/admin/cases/${params.id}`);
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const res = await fetch(`${baseUrl}/api/admin/cases/${params.id}`);
       const json = await res.json();
       setData(json);
     };

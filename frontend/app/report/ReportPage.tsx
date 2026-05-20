@@ -65,7 +65,7 @@ export default function ReportPage() {
       return;
     }
 
-    const geomLocation = `POINT(${lngNum} ${latNum})`;
+    const geomLocation = `${latNum}, ${lngNum}`;
 
     setIsSubmitting(true);
     try {

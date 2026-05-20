@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { saveAuth, getHomeByRole } from "@/lib/auth";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const router = useRouter();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [fullName, setFullName] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -20,18 +21,18 @@ export default function LoginPage() {
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
             const res = await fetch(
-                `${apiUrl}/api/auth/login`,
+                `${apiUrl}/api/auth/register`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password }),
+                    body: JSON.stringify({ username, password, fullName }),
                 }
             );
 
             const data = await res.json();
 
             if (!res.ok) {
-                setError(data.error || "Đăng nhập thất bại");
+                setError(data.error || "Đăng ký thất bại");
                 return;
             }
 
@@ -57,15 +58,32 @@ export default function LoginPage() {
                         </svg>
                     </div>
                     <h1 className="text-2xl font-semibold text-gray-900">
-                        Hệ thống cứu trợ lũ lụt
+                        Đăng ký Tình nguyện viên
                      </h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        Đăng nhập để tiếp tục
+                        Tham gia đội ngũ cứu trợ ngay hôm nay
                     </p>
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                Họ và tên
+                            </label>
+                            <input
+                                type="text"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                placeholder="Nhập họ và tên..."
+                                required
+                                autoFocus
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm
+                  focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent
+                  transition placeholder-gray-400"
+                            />
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                 Tên đăng nhập
@@ -74,9 +92,8 @@ export default function LoginPage() {
                                 type="text"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                placeholder="Nhập username..."
+                                placeholder="Chọn username..."
                                 required
-                                autoFocus
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm
                   focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent
                   transition placeholder-gray-400"
@@ -124,35 +141,21 @@ export default function LoginPage() {
                                         <path className="opacity-75" fill="currentColor"
                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                     </svg>
-                                    Đang đăng nhập...
+                                    Đang xử lý...
                                 </>
                             ) : (
-                                "Đăng nhập"
+                                "Đăng ký tài khoản"
                             )}
                         </button>
                     </form>
 
                     <div className="mt-6 text-center">
                         <p className="text-sm text-gray-600">
-                            Chưa có tài khoản?{" "}
-                            <Link href="/register" className="text-red-600 font-medium hover:underline">
-                                Đăng ký ngay
+                            Đã có tài khoản?{" "}
+                            <Link href="/login" className="text-red-600 font-medium hover:underline">
+                                Đăng nhập
                             </Link>
                         </p>
-                    </div>
-
-                    <div className="mt-6 pt-5 border-t border-gray-100">
-                        <p className="text-xs text-center text-gray-400 mb-3">Tài khoản test</p>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-200">
-                                <div className="font-medium text-gray-700">👤 Admin</div>
-                                <div className="text-gray-500 mt-0.5">admin / 123456</div>
-                            </div>
-                            <div className="p-2.5 rounded-lg bg-gray-50 border border-gray-200">
-                                <div className="font-medium text-gray-700">🦺 Tình nguyện viên</div>
-                                <div className="text-gray-500 mt-0.5">volunteer1 / 123456</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

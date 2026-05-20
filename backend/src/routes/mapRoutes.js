@@ -9,9 +9,6 @@ async function loadReports() {
   const requests = await prisma.rescueRequest.findMany({
     orderBy: { createdAt: "desc" },
   });
-  if (requests.length === 0) {
-    return MOCK_REPORTS;
-  }
   return requests.map(mapDbToReport);
 }
 

@@ -19,10 +19,11 @@ export default function AdminVolunteersPage() {
     try {
       const token = getToken();
       const headers = { Authorization: `Bearer ${token}` };
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       const [volRes, locRes, incRes] = await Promise.all([
-        fetch("http://localhost:5000/api/admin/volunteers", { headers }),
-        fetch("http://localhost:5000/api/admin/volunteers/locations", { headers }),
-        fetch("http://localhost:5000/api/admin/volunteers/incidents_lo", { headers })
+        fetch(`${baseUrl}/api/admin/volunteers`, { headers }),
+        fetch(`${baseUrl}/api/admin/volunteers/locations`, { headers }),
+        fetch(`${baseUrl}/api/admin/volunteers/incidents_lo`, { headers })
       ]);
       setVolunteers(await volRes.json());
       setMapVols(await locRes.json());

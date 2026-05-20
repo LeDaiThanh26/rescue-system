@@ -8,29 +8,38 @@ const { Parser } = require("json2csv");
 // 5.1 & 5.2: Bảng danh sách & Bộ lọc nâng cao (Sort & Filter)
 exports.getCases = async (req, res) => {
     try {
-        const { status, urgencyLevel, district, sortBy = "createdAt", sortOrder = "desc" } = req.query;
+        const { status, urgencyLevel, sortBy = "createdAt", sortOrder = "desc" } = req.query;
 
-        // Xây dựng bộ lọc (Filter)
+        // 1. Xây dựng bộ lọc (Filter)
         const whereClause = {};
         if (status) whereClause.status = status;
-        if (urgencyLevel) whereClause.urgencyLevel = urgencyLevel;
-        if (district) {
-            // Lọc theo quận/huyện dựa vào text trong địa chỉ AI trích xuất
-            whereClause.aiAddress = { contains: district, mode: "insensitive" };
+
+        // Dịch ngược từ tiếng Việt (Frontend) sang tiếng Anh (Database của AI)
+        if (urgencyLevel === "Đỏ") {
+            whereClause.urgencyLevel = { in: ["CRITICAL", "HIGH"] };
+        } else if (urgencyLevel === "Vàng") {
+            whereClause.urgencyLevel = "MEDIUM";
         }
 
-        // Truy vấn DB có sắp xếp (Sort)
-        const cases = await prisma.incident.findMany({
+        // 2. Truy vấn đúng bảng Incident (Nơi quản lý các ca đã qua AI)
+        const incidents = await prisma.incident.findMany({
             where: whereClause,
-            orderBy: { [sortBy]: sortOrder },
-            include: {
-                missions: {
-                    include: { volunteer: { select: { fullName: true } } }
-                }
-            }
+            orderBy: { [sortBy]: sortOrder }
         });
 
-        res.status(200).json(cases);
+        // 3. Format dữ liệu để Frontend đọc được dễ dàng
+        const formattedCases = incidents.map(item => {
+            return {
+                id: item.id,
+                aiAddress: item.aiAddress || "Không xác định",
+                urgencyLevel: item.urgencyLevel,
+                status: item.status,
+                rawMessage: item.rawMessage,
+                createdAt: item.createdAt
+            };
+        });
+
+        res.status(200).json(formattedCases);
     } catch (error) {
         console.error("Lỗi getCases:", error);
         res.status(500).json({ error: "Lỗi Server" });
@@ -145,11 +154,11 @@ exports.getCaseDetail = async (req, res) => {
         // Xây dựng logic cho Module: Lịch sử cập nhật trạng thái (Timeline)
         const timeline = [];
         timeline.push({ status: "Tiếp nhận", time: caseDetail.createdAt });
-        
+
         if (caseDetail.missions.length > 0) {
             const activeMission = caseDetail.missions[0]; // Lấy mission mới nhất
             timeline.push({ status: "Phân công", time: activeMission.createdAt || activeMission.startedAt });
-            
+
             if (activeMission.missionStatus === "ON_SITE") {
                 timeline.push({ status: "Đã tiếp cận", time: new Date() }); // Hoặc lấy từ log
             }

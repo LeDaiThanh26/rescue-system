@@ -5,6 +5,13 @@
 function parseGeom(geomLocation) {
   if (!geomLocation) return { latitude: 16.0544, longitude: 108.2022 };
   try {
+    if (typeof geomLocation === "string" && geomLocation.includes(",")) {
+      const [lat, lng] = geomLocation.split(",").map(s => parseFloat(s.trim()));
+      if (!isNaN(lat) && !isNaN(lng)) {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+    
     const parsed = typeof geomLocation === "string" ? JSON.parse(geomLocation) : geomLocation;
     if (parsed.lat != null && parsed.lng != null) {
       return { latitude: parsed.lat, longitude: parsed.lng };

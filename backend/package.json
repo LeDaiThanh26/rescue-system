@@ -3,9 +3,6 @@
     "scripts": {
         "dev": "nodemon src/server.js"
     },
-    "prisma": {
-        "seed": "node prisma/seed.js"
-    },
     "dependencies": {
         "@prisma/client": "^5.13.0",
         "bcryptjs": "^3.0.3",
