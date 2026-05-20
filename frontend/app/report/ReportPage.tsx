@@ -69,7 +69,7 @@ export default function ReportPage() {
 
     setIsSubmitting(true);
     try {
-      const data = await submitReport({
+      await submitReport({
         rawText: inputText,
         aiExtractedAddress: { text: editedAddress },
         aiUrgency: aiResult.urgency,
@@ -78,11 +78,8 @@ export default function ReportPage() {
         geomLocation,
         geocodingConfidence: aiResult.confidence / 100,
       });
-      setCaseCode(data.caseCode);
       setStep("success");
     } catch {
-      const d = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      setCaseCode(`RES-${d}-${String(Math.floor(Math.random() * 9000) + 1000)}`);
       setStep("success");
     } finally {
       setIsSubmitting(false);
@@ -96,7 +93,6 @@ export default function ReportPage() {
     setAddress("");
     setLat("");
     setLng("");
-    setCaseCode("");
   };
 
   return (
@@ -137,7 +133,7 @@ export default function ReportPage() {
           />
         )}
         {step === "success" && (
-          <SuccessScreen caseCode={caseCode} onReset={handleReset} />
+          <SuccessScreen onReset={handleReset} />
         )}
       </main>
 
