@@ -11,13 +11,13 @@ export async function analyzeRescueText(text: string): Promise<AIResult> {
   const { data } = await aiClient.post("/ai/analyze", { text });
 
   return {
-    address:    data.address    ?? "Không xác định",
-    urgency:    (data.urgency as UrgencyLevel) ?? "MEDIUM",
-    needs:      data.needs      ?? ["Hỗ trợ sơ tán"],
-    contact:    data.contact    ?? "Không có",
-    lat:        data.lat        ?? null,
-    lng:        data.lng        ?? null,
+    address: data.address ?? "Không xác định",
+    urgency: (data.urgency as UrgencyLevel) ?? "MEDIUM",
+    needs: data.needs ?? ["Hỗ trợ sơ tán"],
+    contact: data.contact ?? "Không có",
+    lat: data.lat ?? null,
+    lng: data.lng ?? null,
     confidence: data.confidence ?? 50,
-    source:     data.source,
+    source: data.source,
   };
 }
