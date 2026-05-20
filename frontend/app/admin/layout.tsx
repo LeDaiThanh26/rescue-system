@@ -64,8 +64,8 @@ export default function AdminLayout({
               <Users size={20} /> Tình nguyện viên
             </Link>
             <Link
-              href="/admin/map"
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${pathname.startsWith("/admin/map")
+              href="/map"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${pathname.startsWith("/map")
                 ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
                 : "hover:bg-slate-800 hover:text-white"
                 }`}
