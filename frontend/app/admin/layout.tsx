@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, Users, LayoutDashboard, LogOut } from "lucide-react";
+import { ShieldCheck, Users, LayoutDashboard, LogOut, LifeBuoy, Map } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/useAuth";
@@ -39,20 +39,38 @@ export default function AdminLayout({
             <Link
               href="/admin"
               className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${pathname === "/admin"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
-                  : "hover:bg-slate-800 hover:text-white"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
+                : "hover:bg-slate-800 hover:text-white"
                 }`}
             >
               <LayoutDashboard size={20} /> Tổng quan (Dashboard)
             </Link>
             <Link
+              href="/admin/cases"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${pathname.startsWith("/admin/cases")
+                ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
+                : "hover:bg-slate-800 hover:text-white"
+                }`}
+            >
+              <LifeBuoy size={20} /> Ca cứu hộ
+            </Link>
+            <Link
               href="/admin/volunteers"
               className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${pathname.startsWith("/admin/volunteers")
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
-                  : "hover:bg-slate-800 hover:text-white"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
+                : "hover:bg-slate-800 hover:text-white"
                 }`}
             >
               <Users size={20} /> Tình nguyện viên
+            </Link>
+            <Link
+              href="/admin/map"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition ${pathname.startsWith("/admin/map")
+                ? "bg-blue-600 text-white shadow-md shadow-blue-600/10"
+                : "hover:bg-slate-800 hover:text-white"
+                }`}
+            >
+              <Map size={20} /> Bản đồ cứu hộ
             </Link>
           </nav>
         </div>
