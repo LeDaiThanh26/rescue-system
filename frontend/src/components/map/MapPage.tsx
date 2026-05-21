@@ -21,7 +21,7 @@ const MapView = dynamic(
   }
 );
 
-// Debounce helper
+
 function useDebounce<T>(value: T, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -40,7 +40,7 @@ export default function MapPage() {
   const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [pendingFilters, setPendingFilters] = useState<ReportFilter>({});
-  const filters = useDebounce(pendingFilters, 300); // 300ms debounce
+  const filters = useDebounce(pendingFilters, 300);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [, setSelectedReport] = useState<Report | null>(null);
@@ -62,7 +62,7 @@ export default function MapPage() {
     }
   }, []);
 
-  // UC01 + auto-refresh 60s (doc §5.1) - increased interval for performance
+
   useEffect(() => {
     fetchReports(filters);
 

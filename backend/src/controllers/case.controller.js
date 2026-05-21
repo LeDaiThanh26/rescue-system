@@ -1,33 +1,31 @@
 const prisma = require("../config/db");
 const { Parser } = require("json2csv");
 
-// =========================================================================
-// MỤC 5: QUẢN LÝ DANH SÁCH CASE (/admin/cases)
-// =========================================================================
 
-// 5.1 & 5.2: Bảng danh sách & Bộ lọc nâng cao (Sort & Filter)
+
+
 exports.getCases = async (req, res) => {
     try {
         const { status, urgencyLevel, sortBy = "createdAt", sortOrder = "desc" } = req.query;
 
-        // 1. Xây dựng bộ lọc (Filter)
+
         const whereClause = {};
         if (status) whereClause.status = status;
 
-        // Dịch ngược từ tiếng Việt (Frontend) sang tiếng Anh (Database của AI)
+
         if (urgencyLevel === "Đỏ") {
             whereClause.urgencyLevel = { in: ["CRITICAL", "HIGH"] };
         } else if (urgencyLevel === "Vàng") {
             whereClause.urgencyLevel = "MEDIUM";
         }
 
-        // 2. Truy vấn đúng bảng Incident (Nơi quản lý các ca đã qua AI)
+
         const incidents = await prisma.incident.findMany({
             where: whereClause,
             orderBy: { [sortBy]: sortOrder }
         });
 
-        // 3. Format dữ liệu để Frontend đọc được dễ dàng
+
         const formattedCases = incidents.map(item => {
             return {
                 id: item.id,
@@ -46,24 +44,24 @@ exports.getCases = async (req, res) => {
     }
 };
 
-// 5.3: Phân công đội cứu hộ
+
 exports.assignVolunteer = async (req, res) => {
     try {
-        const { id } = req.params; // ID của case (Incident)
-        const { volunteerId, adminId } = req.body; // Lấy từ form FE
+        const { id } = req.params;
+        const { volunteerId, adminId } = req.body;
 
-        // Tạo mission mới
+
         const mission = await prisma.mission.create({
             data: {
                 incidentId: parseInt(id),
                 volunteerId: parseInt(volunteerId),
-                assignedById: parseInt(adminId), // ID của admin đang thao tác
+                assignedById: parseInt(adminId),
                 missionStatus: "EN_ROUTE",
                 startedAt: new Date()
             }
         });
 
-        // Cập nhật trạng thái case thành ASSIGNED
+
         await prisma.incident.update({
             where: { id: parseInt(id) },
             data: { status: "ASSIGNED" }
@@ -76,7 +74,7 @@ exports.assignVolunteer = async (req, res) => {
     }
 };
 
-// 5.4: Chỉnh sửa thủ công (Sửa sai sót của AI)
+
 exports.updateCaseManual = async (req, res) => {
     try {
         const { id } = req.params;
@@ -94,10 +92,10 @@ exports.updateCaseManual = async (req, res) => {
     }
 };
 
-// 5.5: Xuất báo cáo (Export CSV)
+
 exports.exportCases = async (req, res) => {
     try {
-        // Lấy lại bộ lọc từ query y như hàm getCases
+
         const { status, urgencyLevel } = req.query;
         const whereClause = {};
         if (status) whereClause.status = status;
@@ -109,12 +107,12 @@ exports.exportCases = async (req, res) => {
             return res.status(404).json({ error: "Không có dữ liệu để xuất" });
         }
 
-        // Cấu hình các cột xuất ra CSV
+
         const fields = ['id', 'rawMessage', 'aiAddress', 'urgencyLevel', 'status', 'createdAt'];
         const json2csvParser = new Parser({ fields });
         const csv = json2csvParser.parse(cases);
 
-        // Trả file CSV về cho Frontend tải xuống
+
         res.header('Content-Type', 'text/csv');
         res.attachment('danh-sach-case-cuu-ho.csv');
         return res.send(csv);
@@ -124,11 +122,9 @@ exports.exportCases = async (req, res) => {
     }
 };
 
-// =========================================================================
-// MỤC 6: CHI TIẾT CASE (/admin/cases/:id)
-// =========================================================================
 
-// Tổng hợp cả 5 module của chi tiết case vào 1 API này để FE dễ gọi
+
+
 exports.getCaseDetail = async (req, res) => {
     try {
         const { id } = req.params;
@@ -136,13 +132,10 @@ exports.getCaseDetail = async (req, res) => {
         const caseDetail = await prisma.incident.findUnique({
             where: { id: parseInt(id) },
             include: {
-                // Lấy thông tin đội cứu hộ (Module: Thông tin đội phụ trách)
                 missions: {
                     include: {
                         volunteer: {
                             select: { id: true, fullName: true, currentLocation: true }
-                            // Lưu ý: Nếu schema User chưa có số điện thoại (SĐT), 
-                            // bạn nên bổ sung 'phoneNumber' vào Schema sau này nhé.
                         }
                     }
                 }
@@ -151,35 +144,34 @@ exports.getCaseDetail = async (req, res) => {
 
         if (!caseDetail) return res.status(404).json({ error: "Không tìm thấy case" });
 
-        // Xây dựng logic cho Module: Lịch sử cập nhật trạng thái (Timeline)
+
         const timeline = [];
         timeline.push({ status: "Tiếp nhận", time: caseDetail.createdAt });
 
         if (caseDetail.missions.length > 0) {
-            const activeMission = caseDetail.missions[0]; // Lấy mission mới nhất
+            const activeMission = caseDetail.missions[0];
             timeline.push({ status: "Phân công", time: activeMission.createdAt || activeMission.startedAt });
 
             if (activeMission.missionStatus === "ON_SITE") {
-                timeline.push({ status: "Đã tiếp cận", time: new Date() }); // Hoặc lấy từ log
+                timeline.push({ status: "Đã tiếp cận", time: new Date() });
             }
             if (activeMission.missionStatus === "DONE" || caseDetail.status === "COMPLETED") {
                 timeline.push({ status: "Hoàn thành", time: activeMission.completedAt });
             }
         }
 
-        // Trả về dữ liệu được format sẵn cho Frontend 
+
         res.status(200).json({
-            // Module: Text gốc & JSON AI
             rawMessage: caseDetail.rawMessage,
             aiData: {
                 address: caseDetail.aiAddress,
                 urgency: caseDetail.urgencyLevel,
                 needs: caseDetail.needs,
-                location: caseDetail.geomLocation // Module: Mini-map vị trí
+                location: caseDetail.geomLocation
             },
             status: caseDetail.status,
-            timeline: timeline, // Module: Lịch sử trạng thái
-            teamInfo: caseDetail.missions.length > 0 ? caseDetail.missions[0].volunteer : null // Module: Thông tin đội
+            timeline: timeline,
+            teamInfo: caseDetail.missions.length > 0 ? caseDetail.missions[0].volunteer : null
         });
 
     } catch (error) {

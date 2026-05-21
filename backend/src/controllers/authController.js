@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = require("../config/db");
 
-// Validate required environment variables on startup
+
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");
 }
@@ -76,7 +76,7 @@ exports.register = async (req, res) => {
                 username,
                 passwordHash: hashedPassword,
                 fullName,
-                role: "VOLUNTEER", // Default to VOLUNTEER
+                role: "VOLUNTEER",
             },
         });
 

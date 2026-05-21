@@ -12,7 +12,7 @@ async function loadReports() {
   return requests.map(mapDbToReport);
 }
 
-// GET /api/reports – danh sách + lọc (province, priority, status, category, keyword)
+
 router.get("/reports", async (req, res) => {
   try {
     const reports = await loadReports();
@@ -24,12 +24,12 @@ router.get("/reports", async (req, res) => {
   }
 });
 
-// GET /api/mock/reports – mock data đầy đủ
+
 router.get("/mock/reports", (req, res) => {
   res.json(MOCK_REPORTS);
 });
 
-// GET /api/reports/track/:caseCode – tra cứu theo mã case (doc §7.4)
+
 router.get("/reports/track/:caseCode", async (req, res) => {
   try {
     const code = req.params.caseCode.trim();
@@ -47,7 +47,7 @@ router.get("/reports/track/:caseCode", async (req, res) => {
   }
 });
 
-// GET /api/reports/:id – chi tiết report
+
 router.get("/reports/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -69,7 +69,7 @@ router.get("/reports/:id", async (req, res) => {
   }
 });
 
-// PATCH /api/reports/:id/status
+
 router.patch("/reports/:id/status", async (req, res) => {
   try {
     const { id } = req.params;

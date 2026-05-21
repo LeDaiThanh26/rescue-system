@@ -1,7 +1,4 @@
-/**
- * Mock data module map – đồng bộ với frontend/src/data/mockReports.json
- * Dùng khi DB trống hoặc làm nguồn cho /api/mock/reports
- */
+
 module.exports = [
   {
     id: 1,

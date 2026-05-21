@@ -10,7 +10,7 @@ const apiClient = axios.create({
 });
 
 export const reportService = {
-  // UC01 – GET /api/reports
+
   getAllReports: async (): Promise<Report[]> => {
     try {
       const response = await apiClient.get<Report[]>('/reports');
@@ -24,7 +24,7 @@ export const reportService = {
     }
   },
 
-  // UC03, UC04 – GET /api/reports?province=&priority=&status=&category=&keyword=
+
   filterReports: async (filters: ReportFilter): Promise<Report[]> => {
     try {
       const response = await apiClient.get<Report[]>('/reports', { params: filters });
@@ -39,7 +39,7 @@ export const reportService = {
   },
 
 
-  // UC02 – GET /api/reports/{id}
+
   getReportById: async (id: number): Promise<Report | null> => {
     try {
       const response = await apiClient.get<Report>(`/reports/${id}`);
@@ -49,7 +49,7 @@ export const reportService = {
     }
   },
 
-  // UC05 – GET /api/reports/track/{caseCode}
+
   trackCase: async (caseCode: string): Promise<Report | null> => {
     try {
       const response = await apiClient.get<Report>(
@@ -74,7 +74,7 @@ export const reportService = {
   },
 };
 
-// ── Dùng cho /report page ───────────────────────────────────────────────────
+
 const reportApiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost',
   headers: { 'Content-Type': 'application/json' },

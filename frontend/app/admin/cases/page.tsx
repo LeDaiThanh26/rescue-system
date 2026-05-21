@@ -13,7 +13,7 @@ export default function CasesList() {
   const [selectedCaseId, setSelectedCaseId] = useState<number | null>(null);
   const [isAssigning, setIsAssigning] = useState(false);
 
-  // Gọi API lấy danh sách
+
   useEffect(() => {
     fetchCases();
     fetchVolunteers();
@@ -64,7 +64,7 @@ export default function CasesList() {
       if (res.ok) {
         alert("Phân công thành công!");
         setIsModalOpen(false);
-        fetchCases(); // Refresh list
+        fetchCases();
       } else {
         const errorData = await res.json();
         alert(`Lỗi: ${errorData.error || "Không thể phân công"}`);
@@ -153,7 +153,7 @@ export default function CasesList() {
         </table>
       </div>
 
-      {/* Modal Phân công */}
+
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">

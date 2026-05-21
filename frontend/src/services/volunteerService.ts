@@ -9,7 +9,7 @@ const apiClient = axios.create({
 });
 
 export const volunteerService = {
-  // Get all volunteers
+
   getAllVolunteers: async (): Promise<Volunteer[]> => {
     try {
       const response = await apiClient.get('/volunteers');
@@ -20,7 +20,7 @@ export const volunteerService = {
     }
   },
 
-  // Get volunteer by ID
+
   getVolunteerById: async (id: number): Promise<Volunteer | null> => {
     try {
       const response = await apiClient.get(`/volunteers/${id}`);
@@ -31,7 +31,7 @@ export const volunteerService = {
     }
   },
 
-  // Get available volunteers
+
   getAvailableVolunteers: async (): Promise<Volunteer[]> => {
     try {
       const response = await apiClient.get('/volunteers', {

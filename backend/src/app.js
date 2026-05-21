@@ -6,12 +6,11 @@ const mapRoutes = require("./routes/mapRoutes");
 const reportRouter = require("./routes/report");
 const authRouter = require("./routes/auth");
 
-// Import routes
 const caseRoutes = require("./routes/case.routes");
 
 const app = express();
 
-// ==================== CORS ====================
+
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim())
@@ -24,17 +23,16 @@ app.use(
   })
 );
 
-// ==================== MIDDLEWARE ====================
+
 
 app.use(express.json());
 
-// ==================== ROUTES ====================
+
 
 app.use("/api/auth", authRouter);
 
 app.use("/api/report", reportRouter);
 
-// Admin Cases
 app.use("/api/admin/cases", caseRoutes);
 
 app.use("/api/admin", require("./routes/admin.routes"));
@@ -43,10 +41,9 @@ app.use("/api/volunteer", require("./routes/volunteer.routes"));
 
 
 
-// Map routes
 app.use("/api", mapRoutes);
 
-// ==================== TEST ROUTES ====================
+
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend Running" });
@@ -62,7 +59,7 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
-// ==================== VOLUNTEER ROUTES ====================
+
 
 app.get("/api/volunteers", async (req, res) => {
   try {

@@ -11,7 +11,7 @@ app = FastAPI(title="Rescue AI Service")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 GROQ_API_KEY        = os.environ.get("GROQ_API_KEY", "")
-# Nominatim (OpenStreetMap) — miễn phí, không cần API key
+
 
 groq_client: Groq | None = None
 
@@ -89,15 +89,11 @@ def _keyword_analyze(text: str) -> dict:
     }
 
 async def _geocode_address(address: str) -> tuple[float | None, float | None]:
-    """
-    Geocode địa chỉ → lat/lng bằng Nominatim (OpenStreetMap).
-    Hoàn toàn miễn phí, không cần API key.
-    Nominatim policy: https://operations.osmfoundation.org/policies/nominatim/
-    """
+
     if not address or address == "Không xác định":
         return None, None
 
-    # Thêm 'Việt Nam' nếu chưa có
+
     query = address if "việt nam" in address.lower() else f"{address}, Việt Nam"
 
     try:
@@ -112,7 +108,7 @@ async def _geocode_address(address: str) -> tuple[float | None, float | None]:
                     "accept-language": "vi",
                 },
                 headers={
-                    # Bắt buộc theo Nominatim Usage Policy
+
                     "User-Agent": "RescueSystem/1.0 (emergency-rescue-application)",
                 },
             )
@@ -145,7 +141,7 @@ async def analyze(req: AnalyzeRequest):
 
     result: dict = {}
 
-    # ── Bước 1: Phân tích bằng Groq hoặc keyword fallback ──────────────────
+
     if groq_client:
         try:
             chat = groq_client.chat.completions.create(
@@ -165,13 +161,13 @@ async def analyze(req: AnalyzeRequest):
     if not result:
         result = _keyword_analyze(text)
 
-    # ── Bước 2: Geocode địa chỉ đã trích xuất → lat/lng ────────────────────
+
     lat, lng = await _geocode_address(result.get("address", ""))
 
     result["lat"] = lat
     result["lng"] = lng
 
-    # Nếu geocoding thành công → tăng confidence
+
     if lat is not None and lng is not None:
         result["confidence"] = min(100, result.get("confidence", 70) + 15)
         result["geocoded"] = True

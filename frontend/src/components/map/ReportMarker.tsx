@@ -12,7 +12,7 @@ const PRIORITY_COLORS: Record<string, string> = {
   RESOLVED: '#22C55E',
 };
 
-// Memoize icon creation to prevent re-rendering
+
 const iconCache = new Map<string, L.DivIcon>();
 
 function makeDivIcon(priority: string) {
@@ -67,7 +67,7 @@ export const ReportMarker: React.FC<ReportMarkerProps> = React.memo(({
     </Marker>
   );
 }, (prevProps, nextProps) => {
-  // Only re-render if report data significantly changed
+
   return (
     prevProps.report.id === nextProps.report.id &&
     prevProps.report.latitude === nextProps.report.latitude &&

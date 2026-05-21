@@ -75,7 +75,7 @@ const getAdminDashboardData = async (req, res) => {
             }
         });
 
-        // Trả về toàn bộ dữ liệu gói gọn cho Dashboard
+
         return res.status(200).json({
             success: true,
             stats: totalStats,

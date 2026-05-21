@@ -21,8 +21,7 @@ exports.createReport = async (req, res) => {
       },
     });
 
-    // Sau khi tạo RescueRequest, tạo tiếp bản ghi Incident (Kế hoạch: RescueRequest -> AI -> Incident)
-    // Để flow logic: RescueRequest là lịch sử/log, Incident là thực thể để quản lý ca cứu hộ
+
     const incident = await prisma.incident.create({
       data: {
         rawMessage: rawText.trim(),

@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { AlertCircle, MapPin, Clock, Phone, User } from "lucide-react";
 
-// Load MiniMap dạng Lazy để tránh lỗi SSR của Leaflet
 const MiniMap = dynamic(() => import("../../../components/MiniMap"), { ssr: false });
 
 export default function CaseDetail() {
@@ -23,7 +22,6 @@ export default function CaseDetail() {
 
   if (!data) return <div className="p-10 text-center">Đang tải dữ liệu...</div>;
 
-  // Tách tọa độ (Giả sử DB lưu dạng "16.0601,108.2155")
   const coords = data.aiData.location ? data.aiData.location.split(",") : ["16.0544", "108.2022"];
 
   return (
@@ -33,10 +31,8 @@ export default function CaseDetail() {
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        {/* Cột Trái: Thông tin Văn bản */}
         <div className="col-span-2 space-y-6">
           
-          {/* Module: Text gốc người dân nhập */}
           <div className="bg-white p-5 rounded-lg shadow-sm border border-l-4 border-l-blue-500">
             <h3 className="font-semibold text-gray-700 flex items-center gap-2 mb-2">
               <AlertCircle size={18} /> Tin nhắn khẩn cấp gốc (SMS/Web)
@@ -44,7 +40,6 @@ export default function CaseDetail() {
             <p className="text-gray-600 italic bg-gray-50 p-3 rounded border">"{data.rawMessage}"</p>
           </div>
 
-          {/* Module: JSON AI đã trích xuất */}
           <div className="bg-white p-5 rounded-lg shadow-sm border">
             <h3 className="font-semibold text-gray-700 mb-4">Kết quả AI bóc tách</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -65,7 +60,6 @@ export default function CaseDetail() {
             </div>
           </div>
 
-          {/* Module: Thông tin đội phụ trách */}
           {data.teamInfo ? (
             <div className="bg-white p-5 rounded-lg shadow-sm border border-l-4 border-l-green-500">
               <h3 className="font-semibold text-gray-700 mb-3">Đội đang phụ trách</h3>
@@ -81,10 +75,8 @@ export default function CaseDetail() {
           )}
         </div>
 
-        {/* Cột Phải: Bản đồ & Lịch sử */}
         <div className="space-y-6">
           
-          {/* Module: Mini-map vị trí */}
           <div className="bg-white p-5 rounded-lg shadow-sm border">
             <h3 className="font-semibold text-gray-700 flex items-center gap-2 mb-3">
               <MapPin size={18} /> Tọa độ (Geocoding)
@@ -92,7 +84,6 @@ export default function CaseDetail() {
             <MiniMap lat={parseFloat(coords[0])} lng={parseFloat(coords[1])} address={data.aiData.address} />
           </div>
 
-          {/* Module: Lịch sử cập nhật trạng thái (Timeline) */}
           <div className="bg-white p-5 rounded-lg shadow-sm border">
             <h3 className="font-semibold text-gray-700 flex items-center gap-2 mb-4">
               <Clock size={18} /> Lịch sử xử lý

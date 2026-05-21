@@ -1,6 +1,4 @@
-/**
- * Chuyển đổi RescueRequest (DB) → Report (module map)
- */
+
 
 function parseGeom(geomLocation) {
   if (!geomLocation) return { latitude: 16.0544, longitude: 108.2022 };
@@ -20,7 +18,6 @@ function parseGeom(geomLocation) {
       return { latitude: parsed.latitude, longitude: parsed.longitude };
     }
   } catch {
-    /* ignore */
   }
   return { latitude: 16.0544, longitude: 108.2022 };
 }
