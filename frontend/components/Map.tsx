@@ -1,7 +1,8 @@
 "use client";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useEffect } from "react";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -10,15 +11,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const volIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+// Custom Blue Dot for Volunteer (Current Location style)
+const volIcon = L.divIcon({
+  html: `<div class="relative flex items-center justify-center">
+          <div class="absolute w-6 h-6 bg-blue-500 rounded-full opacity-40 animate-ping"></div>
+          <div class="relative w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-md"></div>
+         </div>`,
+  className: '',
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
+// Red Pin for Incident
 const incidentIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -27,6 +31,35 @@ const incidentIcon = new L.Icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41]
 });
+
+function MapAutoCenter({ volunteers, incidents }: { volunteers: any[], incidents: any[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const points: L.LatLngExpression[] = [];
+
+    volunteers.forEach(v => {
+      if (v.location) {
+        const [lat, lng] = v.location.split(',').map(Number);
+        if (!isNaN(lat) && !isNaN(lng)) points.push([lat, lng]);
+      }
+    });
+
+    incidents.forEach(inc => {
+      if (inc.location) {
+        const [lat, lng] = inc.location.split(',').map(Number);
+        if (!isNaN(lat) && !isNaN(lng)) points.push([lat, lng]);
+      }
+    });
+
+    if (points.length > 0) {
+      const bounds = L.latLngBounds(points);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+    }
+  }, [volunteers, incidents, map]);
+
+  return null;
+}
 
 interface MapProps {
   volunteers?: any[];
@@ -41,6 +74,17 @@ export default function Map({
   center = [10.762622, 106.660172] as [number, number],
   zoom = 13
 }: MapProps) {
+  const polylinePoints: [number, number][] = [];
+
+  // If there's an active incident and a volunteer, prepare the line
+  if (volunteers.length > 0 && incidents.length > 0) {
+    const [vLat, vLng] = volunteers[0].location?.split(',').map(Number) || [0, 0];
+    const [iLat, iLng] = incidents[0].location?.split(',').map(Number) || [0, 0];
+    if (!isNaN(vLat) && !isNaN(iLat)) {
+      polylinePoints.push([vLat, vLng], [iLat, iLng]);
+    }
+  }
+
   return (
     <MapContainer center={center} zoom={zoom} style={{ height: "100%", width: "100%", zIndex: 0 }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -51,7 +95,7 @@ export default function Map({
         if (isNaN(lat) || isNaN(lng)) return null;
         return (
           <Marker key={`vol-${i}-${lat}-${lng}`} position={[lat, lng]} icon={volIcon}>
-            <Popup><strong>{v.name || "Bạn (TNV)"}</strong></Popup>
+            <Popup><strong>{v.name || "Vị trí của bạn"}</strong></Popup>
           </Marker>
         );
       })}
@@ -66,6 +110,18 @@ export default function Map({
           </Marker>
         );
       })}
+
+      {polylinePoints.length === 2 && (
+        <Polyline
+          positions={polylinePoints}
+          color="#3B82F6"
+          weight={4}
+          dashArray="10, 10"
+          opacity={0.7}
+        />
+      )}
+
+      <MapAutoCenter volunteers={volunteers} incidents={incidents} />
     </MapContainer>
   );
 }
