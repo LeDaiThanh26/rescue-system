@@ -7,6 +7,7 @@ const caseController = require("../controllers/case.controller");
 
 router.get("/export", caseController.exportCases);
 
+router.post("/sync", caseController.syncFromRescueRequest);
 
 router.get("/", caseController.getCases);
 

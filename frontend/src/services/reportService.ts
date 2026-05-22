@@ -2,11 +2,12 @@ import axios from 'axios';
 import { Report, ReportFilter, ReportPayload, ReportResponse } from '@/types/report';
 import { applyClientFilters } from '@/utils/mapFilters';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
 });
 
 export const reportService = {

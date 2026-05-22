@@ -22,7 +22,9 @@ export default function CaseDetail() {
 
   if (!data) return <div className="p-10 text-center">Đang tải dữ liệu...</div>;
 
-  const coords = data.aiData.location ? data.aiData.location.split(",") : ["16.0544", "108.2022"];
+const coords = data.aiData.location ? data.aiData.location.split(",") : ["16.0544", "108.2022"];
+const lat = parseFloat(coords[0]);
+const lng = parseFloat(coords[1]);
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -81,7 +83,7 @@ export default function CaseDetail() {
             <h3 className="font-semibold text-gray-700 flex items-center gap-2 mb-3">
               <MapPin size={18} /> Tọa độ (Geocoding)
             </h3>
-            <MiniMap lat={parseFloat(coords[0])} lng={parseFloat(coords[1])} address={data.aiData.address} />
+            <MiniMap lat={lat} lng={lng} address={data.aiData.address} />
           </div>
 
           <div className="bg-white p-5 rounded-lg shadow-sm border">

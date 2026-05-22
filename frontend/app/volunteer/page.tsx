@@ -106,14 +106,22 @@ export default function VolunteerDashboard() {
   const pendingMissions = missions.filter(m => !m.startedAt && m.status !== "DONE");
 
   const mapVols = [{ location: currentLoc, name: "Vị trí của bạn" }];
-
   const mapIncs: any[] = [];
-  if (missionDetail?.incident?.location) {
-    mapIncs.push({ location: missionDetail.incident.location, address: missionDetail.incident.address });
+
+  if (missionDetail?.incident) {
+    const inc = missionDetail.incident;
+    const loc = inc.geomLocation || inc.location;
+    const addr = inc.aiAddress || inc.address || "Sự cố đang xử lý";
+    
+    if (loc) mapIncs.push({ location: loc, address: addr });
   }
+
   pendingMissions.forEach(m => {
-    if (m.incident?.location) {
-      mapIncs.push({ location: m.incident.location, address: m.incident.address });
+    if (m.incident) {
+      const loc = m.incident.geomLocation || m.incident.location;
+      const addr = m.incident.aiAddress || m.incident.address || "Sự cố chờ nhận lệnh";
+      
+      if (loc) mapIncs.push({ location: loc, address: addr });
     }
   });
 
