@@ -11,7 +11,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom Blue Dot for Volunteer (Current Location style)
 const volIcon = L.divIcon({
   html: `<div class="relative flex items-center justify-center">
           <div class="absolute w-6 h-6 bg-blue-500 rounded-full opacity-40 animate-ping"></div>
@@ -22,7 +21,6 @@ const volIcon = L.divIcon({
   iconAnchor: [12, 12],
 });
 
-// Red Pin for Incident
 const incidentIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -76,12 +74,16 @@ export default function Map({
 }: MapProps) {
   const polylinePoints: [number, number][] = [];
 
-  // If there's an active incident and a volunteer, prepare the line
   if (volunteers.length > 0 && incidents.length > 0) {
-    const [vLat, vLng] = volunteers[0].location?.split(',').map(Number) || [0, 0];
-    const [iLat, iLng] = incidents[0].location?.split(',').map(Number) || [0, 0];
-    if (!isNaN(vLat) && !isNaN(iLat)) {
-      polylinePoints.push([vLat, vLng], [iLat, iLng]);
+    const volLoc = volunteers[0]?.location;
+    const incLoc = incidents[0]?.location;
+
+    if (volLoc && incLoc) {
+      const [vLat, vLng] = volLoc.split(',').map((n: string) => Number(n.trim()));
+      const [iLat, iLng] = incLoc.split(',').map((n: string) => Number(n.trim()));
+      if (!isNaN(vLat) && !isNaN(vLng) && !isNaN(iLat) && !isNaN(iLng)) {
+        polylinePoints.push([vLat, vLng], [iLat, iLng]);
+      }
     }
   }
 

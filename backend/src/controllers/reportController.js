@@ -21,24 +21,11 @@ exports.createReport = async (req, res) => {
       },
     });
 
-
-    const incident = await prisma.incident.create({
-      data: {
-        rawMessage: rawText.trim(),
-        aiAddress: aiExtractedAddress ? (aiExtractedAddress.text || aiExtractedAddress) : "Không xác định",
-        geomLocation: geomLocation || null,
-        urgencyLevel: aiUrgency || "MEDIUM",
-        needs: aiNeeds || {},
-        status: "PENDING",
-      }
-    });
-
     res.status(201).json({
       success: true,
       requestId: request.id,
-      incidentId: incident.id,
-      status: incident.status,
-      createdAt: incident.createdAt,
+      status: request.status,
+      createdAt: request.createdAt,
     });
   } catch (error) {
     console.error("Report route error:", error);
