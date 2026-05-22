@@ -12,7 +12,13 @@ const getMyMissions = async (req, res) => {
         const missions = await MissionService.getMissionsByVolunteerId(req.user.id);
         res.json(missions.map(m => ({
             id: m.id, status: m.missionStatus, startedAt: m.startedAt,
-            incident: m.incident ? { id: m.incident.id, message: m.incident.rawMessage, urgency: m.incident.urgencyLevel, address: m.incident.aiAddress || "Chưa có địa chỉ" } : null
+            incident: m.incident ? { 
+                id: m.incident.id, 
+                message: m.incident.rawMessage, 
+                urgency: m.incident.urgencyLevel, 
+                address: m.incident.aiAddress || "Chưa có địa chỉ",
+                location: m.incident.geomLocation
+            } : null
         })));
     } catch (error) { handleError(res, error); }
 };

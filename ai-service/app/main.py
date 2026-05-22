@@ -18,7 +18,6 @@ groq_client: Groq | None = None
 if GROQ_API_KEY:
     try:
         groq_client = Groq(api_key=GROQ_API_KEY)
-        logger.info("✅ Groq client initialized")
     except Exception as e:
         logger.warning(f"Groq init failed: {e}")
 

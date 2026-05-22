@@ -16,7 +16,7 @@ export default function VolunteerDashboard() {
   const fetchMissions = async () => {
     try {
       const token = getToken();
-      const res = await fetch("http://localhost:5000/api/volunteer/missions", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/volunteer/missions`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -33,7 +33,7 @@ export default function VolunteerDashboard() {
     if (authLoading) return;
     fetchMissions();
     const token = getToken();
-    const evtSource = new EventSource(`http://localhost:5000/api/volunteer/stream?token=${token}`);
+    const evtSource = new EventSource(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/volunteer/stream?token=${token}`);
     evtSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === "NEW_MISSION") fetchMissions();
@@ -50,7 +50,7 @@ export default function VolunteerDashboard() {
           const locString = `${pos.coords.latitude}, ${pos.coords.longitude}`;
           setCurrentLoc(locString);
           const token = getToken();
-          fetch("http://localhost:5000/api/volunteer/location", {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/volunteer/location`, {
             method: "PATCH",
             headers: { 
               "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export default function VolunteerDashboard() {
   useEffect(() => {
     if (activeMission) {
       const token = getToken();
-      fetch(`http://localhost:5000/api/volunteer/missions/${activeMission.id}`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/volunteer/missions/${activeMission.id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -85,7 +85,7 @@ export default function VolunteerDashboard() {
   }, [activeMission]);
 
   const handleAction = async (id: number, action: string, status?: string) => {
-    const url = `http://localhost:5000/api/volunteer/missions/${id}/${action}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/volunteer/missions/${id}/${action}`;
     try {
       const token = getToken();
       await fetch(url, {
@@ -151,7 +151,7 @@ export default function VolunteerDashboard() {
           </button>
         </header>
 
-        <div className="h-[250px] w-full shrink-0 relative z-0 border-b border-slate-200 bg-slate-200">
+        <div className="h-[300px] w-full shrink-0 relative z-0 border-b border-slate-200 bg-slate-200">
           <MapWrapper volunteers={mapVols} incidents={mapIncs} />
           {currentLoc && (
             <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-blue-600 shadow-md z-[400] flex items-center gap-1">
